@@ -55,6 +55,7 @@ class GAME1:
         self.images = []
         self.rects = []
         self.imagenes1_array = ['autobus.png','coche.png','barco.png','autobus2.png','grua.png','bici.png']
+        
         for i in self.imagenes1_array:
             # We divide in variables so we can then get the rect of the whole Img (i2)
             i2 = pygame.image.load(i)
@@ -63,12 +64,22 @@ class GAME1:
             r = s.get_rect()
             
             # Trying to use colliderect so it doesnt overlap
+            position_set = False 
+            while not position_set:
+                r.x = random.randint(300,1000)
+                r.y = random.randint(200,700)    
+        
+                if len(self.rects) == 0 or r.collidelist(self.rects) < 0:
+                    self.rects.append(r)
+                    position_set = True
+            '''
             if pygame.Rect.colliderect(r,r) == True:
                 x = random.randint(300,1000)
                 y = random.randint(200,700)
             
                 self.rects.append(r)
-        
+            '''
+        print(self.images)
 
     def start(self, gamestate):
         self.gamestate = gamestate
