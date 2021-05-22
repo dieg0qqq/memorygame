@@ -72,31 +72,21 @@ class GAME1:
                 if len(self.rects) == 0 or r.collidelist(self.rects) < 0:
                     self.rects.append(r)
                     position_set = True
-            '''
-            if pygame.Rect.colliderect(r,r) == True:
-                x = random.randint(300,1000)
-                y = random.randint(200,700)
-            
-                self.rects.append(r)
-            '''
+    
         print(self.images)
 
     def start(self, gamestate):
         self.gamestate = gamestate
-
-        for rect in self.rects:
-            # Give random coordinates (we limit the dimensions (x,y))
-            x = random.randint(300,1000)
-            y = random.randint(200,700)
-            rect.x = x
-            rect.y = y
-
+       
     def draw(self,screen):
         self.background = pygame.Surface(size)
         font = pygame.font.SysFont("comicsansms",70)
         
-        # First half (Show image to remember)
+        # First half 
         text1 = font.render('¡A recordar!',True, PURPLE)
+        # Show image to remember and then fade out
+        coche_img = pygame.image.load('coche.png')
+        #screen.blit(coche_img, (600, 450))
         text1_1 = text1.copy()
         # This surface is used to adjust the alpha of the txt_surf.
         alpha_surf = pygame.Surface(text1_1.get_size(), pygame.SRCALPHA)
