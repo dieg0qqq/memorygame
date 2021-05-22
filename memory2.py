@@ -3,7 +3,7 @@ import sys, pygame, pygame.freetype, random
 from pygame.locals import *
 
 # Set size of window
-size = 1600, 900
+size = 1280,768
 background_img = pygame.image.load('fondo_memory.png')
 
 # Colours    R    G    B
@@ -28,16 +28,16 @@ class PORTRAIT:
 
         self.flechaImg = pygame.image.load('flecha.png')
         self.flechaImg_rect = self.flechaImg.get_rect()
-        self.flechaImg_rect = self.flechaImg_rect.move(1300,600)
+        self.flechaImg_rect = self.flechaImg_rect.move(1000,500)
 
         self.next_scene = next_scene
         
     def draw(self,screen):
         # Draw them 
-        font = pygame.font.SysFont("comicsansms",90)
+        font = pygame.font.SysFont("comicsansms",80)
         img = font.render('Memory',True, PURPLE)
-        screen.blit(img, (620,400)) 
-        screen.blit(self.flechaImg, (1300,600))
+        screen.blit(img, (500,334)) 
+        screen.blit(self.flechaImg, (1000,500))
     
     def update(self, events, dt):
         for event in events:
@@ -66,10 +66,12 @@ class GAME1:
             # Trying to use colliderect so it doesnt overlap
             position_set = False 
             while not position_set:
-                r.x = random.randint(300,1000)
-                r.y = random.randint(200,700)    
-        
-                if len(self.rects) == 0 or r.collidelist(self.rects) < 0:
+                r.x = random.randint(200,840)
+                r.y = random.randint(100,600)    
+
+                margin = 10
+                rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
+                if len(self.rects) == 0 or r.collidelist(rl) < 0:
                     self.rects.append(r)
                     position_set = True
     
@@ -80,7 +82,7 @@ class GAME1:
        
     def draw(self,screen):
         self.background = pygame.Surface(size)
-        font = pygame.font.SysFont("comicsansms",70)
+        font = pygame.font.SysFont("comicsansms",60)
         
         # First half 
         text1 = font.render('¡A recordar!',True, PURPLE)
@@ -98,7 +100,7 @@ class GAME1:
             alpha_surf.fill((255, 255, 255, alpha))
             text1_1.blit(alpha_surf, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
         
-        screen.blit(text1_1, (600,50))
+        screen.blit(text1_1, (500,30))
        
 
         # Second half (Show all similar images)
@@ -125,7 +127,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Ponemos el título e icono y fondo de la ventana
-    pygame.display.set_caption("Quiz Game")
+    pygame.display.set_caption("Memory")
     icon = pygame.image.load('icon.png')
     pygame.display.set_icon(icon)
     fondoImg = pygame.image.load('fondo_memory.png')
