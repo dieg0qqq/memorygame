@@ -56,18 +56,25 @@ class GAME1:
         self.rects = []
         self.imagenes1_array = ['autobus.png','coche.png','barco.png','autobus2.png','grua.png','bici.png']
         for i in self.imagenes1_array:
-            self.images.append(pygame.image.load(i))
-            s = pygame.Surface((20,20))
-            self.rects.append(s.get_rect())
-        
-        #self.text_faded = 
+            # We divide in variables so we can then get the rect of the whole Img (i2)
+            i2 = pygame.image.load(i)
+            self.images.append(i2)
+            s = pygame.Surface(i2.get_size())
+            r = s.get_rect()
+            
+            # Trying to use colliderect so it doesnt overlap
+            if pygame.Rect.colliderect(r,r) == True:
+                x = random.randint(300,1000)
+                y = random.randint(200,700)
+            
+                self.rects.append(r)
         
 
     def start(self, gamestate):
         self.gamestate = gamestate
 
         for rect in self.rects:
-            # Give random coordinates
+            # Give random coordinates (we limit the dimensions (x,y))
             x = random.randint(300,1000)
             y = random.randint(200,700)
             rect.x = x
@@ -90,18 +97,16 @@ class GAME1:
             alpha_surf.fill((255, 255, 255, alpha))
             text1_1.blit(alpha_surf, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
         
-        screen.blit(text1_1, (500,100))
+        screen.blit(text1_1, (600,50))
        
 
         # Second half (Show all similar images)
         text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
         #screen.blit(text2, (500,50))
-        '''
+        
         for i in range(len(self.images)):
             #colliding = pygame.Rect.collidelistall(self.rects)
-            
             screen.blit(self.images[i], (self.rects[i].x, self.rects[i].y))
-        '''
     
     def update(self, events, dt):
         for event in events:
