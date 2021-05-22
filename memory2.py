@@ -1,8 +1,10 @@
-# Importamos las librerías necesarias
+# Import libraries
 import sys, pygame, pygame.freetype, random
 from pygame.locals import *
 
+# Set size of window
 size = 1600, 900
+background_img = pygame.image.load('fondo_memory.png')
 
 # Colours    R    G    B
 GRAY     = (100, 100, 100)
@@ -17,9 +19,11 @@ ORANGE   = (255, 128,   0)
 PURPLE   = (127,   0, 255)
 CYAN     = (  0, 255, 255)
 
-class PrimeraEscena:
+# PORTRAIT SCENE
+class PORTRAIT:
 
     def __init__(self, next_scene):
+        # Initialize variables
         self.background = pygame.Surface(size)
 
         self.flechaImg = pygame.image.load('flecha.png')
@@ -29,6 +33,7 @@ class PrimeraEscena:
         self.next_scene = next_scene
         
     def draw(self,screen):
+        # Draw them 
         font = pygame.font.SysFont("comicsansms",90)
         img = font.render('Memory',True, PURPLE)
         screen.blit(img, (620,400)) 
@@ -42,10 +47,11 @@ class PrimeraEscena:
                     return (self.next_scene, None)
 
 
-class Juego1:
+class GAME1:
     def __init__(self, next_scene):
         self.background = pygame.Surface(size)
         
+        # Create an array of images with their rect
         self.images = []
         self.rects = []
         self.imagenes1_array = ['autobus.png','coche.png','barco.png','autobus2.png','grua.png','bici.png']
@@ -53,29 +59,49 @@ class Juego1:
             self.images.append(pygame.image.load(i))
             s = pygame.Surface((20,20))
             self.rects.append(s.get_rect())
-
-        print(self.images)
-        print(self.imagenes1_array)
+        
+        #self.text_faded = 
         
 
     def start(self, gamestate):
         self.gamestate = gamestate
+
         for rect in self.rects:
-            
+            # Give random coordinates
             x = random.randint(300,1000)
             y = random.randint(200,700)
             rect.x = x
             rect.y = y
-            
-        
-       
+
     def draw(self,screen):
         self.background = pygame.Surface(size)
+        font = pygame.font.SysFont("comicsansms",70)
         
+        # First half (Show image to remember)
+        text1 = font.render('¡A recordar!',True, PURPLE)
+        text1_1 = text1.copy()
+        # This surface is used to adjust the alpha of the txt_surf.
+        alpha_surf = pygame.Surface(text1_1.get_size(), pygame.SRCALPHA)
+        alpha = 255 # The current alpha value of the surface.
+
+        if alpha > 0:
+            alpha = max(alpha-4, 0)
+            text1_1 = text1.copy()
+            alpha_surf.fill((255, 255, 255, alpha))
+            text1_1.blit(alpha_surf, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
+        
+        screen.blit(text1_1, (500,100))
+       
+
+        # Second half (Show all similar images)
+        text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
+        #screen.blit(text2, (500,50))
+        '''
         for i in range(len(self.images)):
             #colliding = pygame.Rect.collidelistall(self.rects)
+            
             screen.blit(self.images[i], (self.rects[i].x, self.rects[i].y))
-        
+        '''
     
     def update(self, events, dt):
         for event in events:
@@ -98,39 +124,39 @@ def main():
     pygame.display.set_icon(icon)
     fondoImg = pygame.image.load('fondo_memory.png')
 
+    # Setting up Scenes
     dt = 0
     scenes = {
-        'PORTADA': PrimeraEscena('SEGUNDA'),
-        'SEGUNDA': Juego1('SEGUNDA'),
+        'PORTADA': PORTRAIT('SEGUNDA'),
+        'SEGUNDA': GAME1('SEGUNDA'),
 
 
     }
     scene = scenes['PORTADA']
-    # Comenzamos el bucle del juego
+
+    # Start running game loop
     run=True
     while run:
         # RGB - Red, Green, Blue
         screen.fill ((255,255,255))
         
-        # Imagen fondo
+        # Background img
         screen.blit(fondoImg, (0,0))
 
-        # Eventos del mouse 
+        # EVENTS 
         events = pygame.event.get()
-
-        # Capturamos los eventos que se han producido
         for event in events:
-            
-            # Definimos eventos:
             if event.type == pygame.QUIT: # Si el evento es salir de la ventana, terminamos
                 run = False
-            
+
+        # Scene managment??    
         result = scene.update(events, dt)
         if result:
             next_scene, state = result
             if next_scene:
                 scene = scenes[next_scene]
                 scene.start(state)
+       
         scene.draw(screen)
         pygame.display.flip()
         dt = clock.tick(60)
