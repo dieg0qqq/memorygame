@@ -19,6 +19,9 @@ ORANGE   = (255, 128,   0)
 PURPLE   = (127,   0, 255)
 CYAN     = (  0, 255, 255)
 
+fade_event = pygame.USEREVENT + 1
+fade_timer = 10
+
 # PORTRAIT SCENE
 class PORTRAIT:
 
@@ -32,7 +35,7 @@ class PORTRAIT:
 
         self.next_scene = next_scene
         
-    def draw(self,screen):
+    def draw(self,screen, dt):
         # Draw them 
         font = pygame.font.SysFont("comicsansms",80)
         img = font.render('Memory',True, PURPLE)
@@ -44,13 +47,19 @@ class PORTRAIT:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = event.pos
                 if self.flechaImg_rect.collidepoint(mouse_pos):
+                    pygame.time.set_timer(fade_event, 1000)
                     return (self.next_scene, None)
-
+                
 
 class GAME1:
     def __init__(self, next_scene):
         self.background = pygame.Surface(size)
         
+        self.fade = False
+        self.fade_time = 0
+        self.current_alpha = 255
+        self.part = 1
+                
         # Create an array of images with their rect
         self.images = []
         self.rects = []
@@ -80,43 +89,92 @@ class GAME1:
     def start(self, gamestate):
         self.gamestate = gamestate
        
-    def draw(self,screen):
+    def draw(self,screen, dt):
         self.background = pygame.Surface(size)
-        font = pygame.font.SysFont("comicsansms",60)
-        
-        # First half 
+        font = pygame.font.SysFont("comicsansms",50)
+
+        self.correct_image_rect = self.rects[self.imagenes1_array.index('coche.png')]
+        coche_img = pygame.image.load('coche.png').convert_alpha()
+        # If we wanted to make it bigger:
+        # coche_img = pygame.transform.scale(coche_img, (400,300))
         text1 = font.render('¡A recordar!',True, PURPLE)
-        # Show image to remember and then fade out
-        coche_img = pygame.image.load('coche.png')
-        #screen.blit(coche_img, (600, 450))
-        text1_1 = text1.copy()
-        # This surface is used to adjust the alpha of the txt_surf.
-        alpha_surf = pygame.Surface(text1_1.get_size(), pygame.SRCALPHA)
-        alpha = 255 # The current alpha value of the surface.
 
-        if alpha > 0:
-            alpha = max(alpha-4, 0)
-            text1_1 = text1.copy()
-            alpha_surf.fill((255, 255, 255, alpha))
-            text1_1.blit(alpha_surf, (0,0), special_flags = pygame.BLEND_RGBA_MULT)
-        
-        screen.blit(text1_1, (500,30))
-       
+        # First half     
+        if self.part == 1 and not self.fade:
+            # Show image to remember and then fade out
+            screen.blit(text1, (500, 20))
+            screen.blit(coche_img, (570, 300))
+    
+        elif self.part == 1 and self.fade:
+            self.fade_time += dt
+            if self.fade_time > fade_timer:
+                self.fade_time = 0
+                coche_img.set_alpha(self.current_alpha)
+                text1.set_alpha(self.current_alpha)
+               
+                self.current_alpha -= 3
+                if self.current_alpha == 0:
+                   self.fade = False
+                   self.part = 2
+            # Blit the fade effect
+            screen.blit(text1, (500, 20))
+            screen.blit(coche_img, (570, 300)) 
+    
+        else:
+            # Second half 
+            text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
+            screen.blit(text2, (450,10))
 
-        # Second half (Show all similar images)
-        text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
-        #screen.blit(text2, (500,50))
-        
-        for i in range(len(self.images)):
-            #colliding = pygame.Rect.collidelistall(self.rects)
-            screen.blit(self.images[i], (self.rects[i].x, self.rects[i].y))
+            # Show all similar images        
+            for i in range(len(self.images)):
+                screen.blit(self.images[i], (self.rects[i].x, self.rects[i].y))
     
     def update(self, events, dt):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.correct_image_rect.collidepoint(event.pos):
+                        return ('CORRECT',CorrectScreen())
                 for rect in self.rects:
-                    if rect.collidepoint(event.pos):
-                        print('works!')
+                    if not self.correct_image_rect.collidepoint(event.pos) and rect.collidepoint(event.pos):
+                        return ('INCORRECT',WrongScreen())
+
+
+class CorrectScreen:
+    def __init__(self):
+        self.background = pygame.Surface(size)
+
+    def start(self, gamestate):
+        self.gamestate = gamestate    
+
+    def draw(self,screen,dt):
+       self.background = pygame.Surface(size) 
+       font = pygame.font.SysFont("comicsansms",50)
+       text = font.render('¡Correcto!', True, GREEN)
+       screen.blit(text, (500, 200))
+
+    def update(self, events, dt):
+       for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN: 
+                print('ok')
+
+class WrongScreen:                        
+    def __init__(self):
+        self.background = pygame.Surface(size)
+
+    def start(self, gamestate):
+        self.gamestate = gamestate    
+
+    def draw(self,screen,dt):
+       self.background = pygame.Surface(size) 
+       font = pygame.font.SysFont("comicsansms",50)
+       text = font.render('¡Incorrecto!', True, RED)
+       screen.blit(text, (500, 200))
+
+    def update(self, events, dt):
+       for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN: 
+                print('ok')
+
 
 def main():
     # Inicializamos pygame
@@ -137,6 +195,8 @@ def main():
     scenes = {
         'PORTADA': PORTRAIT('SEGUNDA'),
         'SEGUNDA': GAME1('SEGUNDA'),
+        'CORRECT': CorrectScreen(),
+        'INCORRECT': WrongScreen(),
 
 
     }
@@ -145,8 +205,6 @@ def main():
     # Start running game loop
     run=True
     while run:
-        # RGB - Red, Green, Blue
-        screen.fill ((255,255,255))
         
         # Background img
         screen.blit(fondoImg, (0,0))
@@ -156,7 +214,11 @@ def main():
         for event in events:
             if event.type == pygame.QUIT: # Si el evento es salir de la ventana, terminamos
                 run = False
-
+            if event.type == fade_event:
+                scene.fade = True
+                pygame.time.set_timer(fade_event, 0)
+                print("fade event")
+     
         # Scene managment??    
         result = scene.update(events, dt)
         if result:
@@ -165,7 +227,7 @@ def main():
                 scene = scenes[next_scene]
                 scene.start(state)
        
-        scene.draw(screen)
+        scene.draw(screen, dt)
         pygame.display.flip()
         dt = clock.tick(60)
         #pygame.display.update()
