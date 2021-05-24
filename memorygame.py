@@ -142,6 +142,8 @@ class GAME1:
 class CorrectScreen:
     def __init__(self):
         self.background = pygame.Surface(size)
+        self.correct = pygame.image.load('correct.png')
+        self.correct = pygame.transform.scale(self.correct, (400,400))
 
     def start(self, gamestate):
         self.gamestate = gamestate    
@@ -151,6 +153,7 @@ class CorrectScreen:
        font = pygame.font.SysFont("comicsansms",50)
        text = font.render('¡Correcto!', True, GREEN)
        screen.blit(text, (500, 200))
+       screen.blit(self.correct, (500,200))
 
     def update(self, events, dt):
        for event in events:
@@ -160,6 +163,8 @@ class CorrectScreen:
 class WrongScreen:                        
     def __init__(self):
         self.background = pygame.Surface(size)
+        self.incorrect = pygame.image.load('incorrect.png')
+        self.incorrect = pygame.transform.scale(self.incorrect, (400,400))
 
     def start(self, gamestate):
         self.gamestate = gamestate    
@@ -169,6 +174,7 @@ class WrongScreen:
        font = pygame.font.SysFont("comicsansms",50)
        text = font.render('¡Incorrecto!', True, RED)
        screen.blit(text, (500, 200))
+       screen.blit(self.incorrect, (500,200))
 
     def update(self, events, dt):
        for event in events:
