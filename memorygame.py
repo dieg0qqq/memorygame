@@ -111,12 +111,10 @@ class Scene(pygame.Surface):
         self.next_scene = next_scene
 
         # it has the background image and the flecha img
-        # so all scenes can use the same background and 
-        # the flecha img
-
-        self.background_img = background_img
+        # so all scenes can use the same background and the flecha img
+        self.background_img = background_img 
         self.flechaImg_rect = flechaImg.get_rect()
-        self.flechaImg_rect.move_ip(1000,500)
+        self.flechaImg_rect.move_ip(1000,500)  
 
     def get_event(self, event):
         mouse_pos = event.pos
@@ -131,17 +129,21 @@ class Scene(pygame.Surface):
 
     def draw(self, surf):
         surf.blit(self.background_img, (0,0))
-        surf.blit(flechaImg, self.flechaImg_rect)
+        
 
 class IntroScene(Scene):
 
     def __init__(self, images = None, name = "Intro", next_scene = "next_game"):
        super().__init__(images, name, next_scene)
 
+       self.flechaImg_rect = flechaImg.get_rect()
+       self.flechaImg_rect.move_ip(1000,500)
+
     def draw(self, surf):
         super().draw(surf)
         img = font.render('Memory',True, PURPLE)
         surf.blit(img, (500,334)) 
+        surf.blit(flechaImg, self.flechaImg_rect)
 
 class GameScene(Scene):
     def __init__(self, images, main_image, name, next_scene):
@@ -234,59 +236,31 @@ class CorrectScene(Scene):
         super().__init__(None, "correct", "next_game")
         self.correct = pygame.image.load('correct.png')
         self.correct = pygame.transform.scale(self.correct, (400,400))
-        self.correct.set_alpha(255)
-
-        self.fade_time = 0
-        self.current_alpha = 255
-        self.fade = True
-
-    def update(self, dt):
-
-        if self.fade:
-            self.fade_time += dt
-            if self.fade_time > fade_timer:
-                self.fade_time = 0
-                self.correct.set_alpha(self.current_alpha)
-
-                self.current_alpha -= 3
-                if self.current_alpha <= 0:
-                   self.fade = False
+        self.flechaImg_rect = flechaImg.get_rect()
+        self.flechaImg_rect.move_ip(1000,500)
 
     def draw(self, surf):
         super().draw(surf)
         text = font.render('¡Correcto!', True, GREEN)
-        surf.blit(text, (500, 200))
-        surf.blit(self.correct, (500,200))
+        surf.blit(text, (500, 40))
+        surf.blit(self.correct, (500,180))
+        surf.blit(flechaImg, self.flechaImg_rect)
 
 class IncorrectScene(Scene):                        
     def __init__(self):
         super().__init__(None, "incorrect", "next_game")
         self.incorrect = pygame.image.load('incorrect.png')
         self.incorrect = pygame.transform.scale(self.incorrect, (400,400))
-        self.incorrect.set_alpha(255)
-
-        self.fade_time = 0
-        self.current_alpha = 255
-        self.fade = True
-
-    def update(self, dt):
-
-        if self.fade:
-            self.fade_time += dt
-            if self.fade_time > fade_timer:
-                self.fade_time = 0
-                self.incorrect.set_alpha(self.current_alpha)
-
-                self.current_alpha -= 3
-                if self.current_alpha <= 0:
-                   self.fade = False
+        self.flechaImg_rect = flechaImg.get_rect()
+        self.flechaImg_rect.move_ip(1000,500)
 
     def draw(self, surf):
         super().draw(surf)
         font = pygame.font.SysFont("comicsansms",50)
         text = font.render('¡Incorrecto!', True, RED)
-        surf.blit(text, (500, 200))
-        surf.blit(self.incorrect, (500,200))
+        surf.blit(text, (500, 40))
+        surf.blit(self.incorrect, (450,180))
+        surf.blit(flechaImg, self.flechaImg_rect)
 
 # instead of just doing def main(), we create a class to run everything
 class MemoryGame(object):
