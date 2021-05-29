@@ -66,6 +66,7 @@ for img in imagenes1_array:
     image = pygame.image.load(img)
     images.append(image)
 
+
 # the background image
 background_img = pygame.image.load('fondo_memory.png')
 
@@ -149,6 +150,15 @@ class GameScene(Scene):
     def __init__(self, images, main_image, name, next_scene):
         super().__init__(images, name, next_scene)
         self.main_image = main_image
+
+        # we load the images here so they are accessible throughout
+        images = [] 
+        imagenes1_array = ['autobus.png','coche.png','barco.png','autobus2.png','grua.png','bici.png']
+
+        for img in imagenes1_array:
+            image = pygame.image.load(img)
+            images.append(image)
+
 
         # Fade effect set-up
         self.fade = False
