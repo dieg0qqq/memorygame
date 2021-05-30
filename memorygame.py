@@ -53,8 +53,8 @@ fade_event = pygame.USEREVENT + 1
 fade_timer = 10
 
 # this sets the image directory. They are in the same place as the code at present, so we just use this:
-img_dir1 = os.path.join(os.path.dirname(__file__), "Imgs1")
-img_dir2 = os.path.join(os.path.dirname(__file__), "Imgs2")
+img_dir1 = os.path.join(os.path.dirname(__file__), "./Imgs1")
+img_dir2 = os.path.join(os.path.dirname(__file__), "./Imgs2")
 
 # you could put the images in their own folder and use this to set the img_dir, as long as the image dir was called "img"!:
 # img_dir = path.join(path.dirname(__file__), "img")
@@ -63,13 +63,13 @@ img_dir2 = os.path.join(os.path.dirname(__file__), "Imgs2")
 images1 = [] 
 files = os.listdir(img_dir1)
 for file in files:
-	img = pygame.image.load(file)
+	img = pygame.image.load(os.path.join(img_dir1, file))
 	images1.append(img)
 
 images2 = [] 
 files = os.listdir(img_dir2)
 for file in files:
-	img = pygame.image.load(file)
+	img = pygame.image.load(os.path.join(img_dir2, file))
 	images2.append(img)
 
 # we make a dictionary for the levels and images, so we can switch images using the level (1,2) as the dictionary key, i.e. we can just do:
