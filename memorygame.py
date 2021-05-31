@@ -281,16 +281,16 @@ class ScoreScene(Scene):
 	def __init__(self, score):
 		super().__init__(None, "Score", "new_game")
 		self.score = str(score)
-		self.score_surf = font.render(self.score, True, RED)
-		self.play_again = font.render("Play again?", True, RED)
+		self.score_surf = font.render(self.score, True, PURPLE)
+		self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
 
-		self.yes = font.render("Yes!", True, RED, BLUE)
+		self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
 		self.yes_rect = self.yes.get_rect()
-		self.yes_rect.move_ip(500, 380)
+		self.yes_rect.move_ip(500, 450)
 
-		self.no = font.render("No", True, RED, BLUE)
+		self.no = font.render("No", True, RED, NAVYBLUE)
 		self.no_rect = self.no.get_rect()
-		self.no_rect.move_ip(650, 380)
+		self.no_rect.move_ip(650, 450)
 	
 	def get_event(self, event):
 		mouse_pos = event.pos
@@ -302,11 +302,11 @@ class ScoreScene(Scene):
 
 	def draw(self, surf):
 		super().draw(surf)
-		font = pygame.font.SysFont("comicsansms",50)
-		text = font.render('Score', True, RED)
-		surf.blit(text, (500, 40))
-		surf.blit(self.score_surf, (450,180))
-		surf.blit(self.play_again, (450, 280))
+		font = pygame.font.SysFont("comicsansms",60)
+		text = font.render('Puntuación', True, PURPLE)
+		surf.blit(text, (500, 50))
+		surf.blit(self.score_surf, (620,180))
+		surf.blit(self.play_again, (380, 300))
 		surf.blit(self.yes, self.yes_rect)
 		surf.blit(self.no, self.no_rect)
 
