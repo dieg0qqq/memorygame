@@ -53,8 +53,8 @@ fade_event = pygame.USEREVENT + 1
 fade_timer = 10
 
 # this sets the image directory. They are in the same place as the code at present, so we just use this:
-img_dir1 = os.path.join(os.path.dirname(__file__), "./Imgs1")
-img_dir2 = os.path.join(os.path.dirname(__file__), "./Imgs2")
+img_dir1 = os.path.join(os.path.dirname(__file__), "Imgs1")
+img_dir2 = os.path.join(os.path.dirname(__file__), "Imgs2")
 
 # you could put the images in their own folder and use this to set the img_dir, as long as the image dir was called "img"!:
 # img_dir = path.join(path.dirname(__file__), "img")
@@ -275,6 +275,7 @@ class IncorrectScene(Scene):
         surf.blit(text, (500, 40))
         surf.blit(self.incorrect, (450,180))
         surf.blit(flechaImg, self.flechaImg_rect)
+
 # this shows the score and asks if the player wants to play again
 class ScoreScene(Scene):
 	def __init__(self, score):
@@ -325,20 +326,20 @@ class MemoryGame(object):
         # Para los niveles y puntuación
         self.level = 1
         self.max_level = 2
-        self.game_counter = 0
+        self.turn_counter = 0
 		
         self.score = 0
         # Creamos un nuevo nivel
         self.new_level()
 
-        # we set the self.scene to point to an instance of the IntroScene
-        # and self.next_scene is set to None
+        # we set the self.scene to point to an instance of the IntroScene and self.next_scene is set to None
         self.Intro = IntroScene()
         self.scene = self.Intro
         self.next_scene = None
 
     def new_level(self):
         self.game_images = []
+        self.turn_counter = 0
 
 		# we create some GameImage objects here with the images passed to them
 		# they will create their rects and we will let the gamescene class
@@ -352,9 +353,10 @@ class MemoryGame(object):
     def new_game(self):
         self.score = 0
         self.level = 1
-        self.game_counter = 0
+        self.turn_counter = 0
         self.new_level()
         self.next_scene = "next_game"
+        pygame.time.set_timer(fade_event, 1000)
         self.update(0)
     
     # this is the main loop - the code just goes around this over and over
@@ -397,17 +399,16 @@ class MemoryGame(object):
             return
 
         elif self.next_scene == "CORRECT":
-            self.score += 1
             self.scene = CorrectScene()
         elif self.next_scene == "INCORRECT":
             self.scene = IncorrectScene()
         elif self.next_scene == "next_game":
             main_image = random.choice(self.game_images)
             self.scene = GameScene(self, self.game_images, main_image, "game", "Score") 
-            self.game_counter += 1
+            self.turn_counter += 1
             
-            if self.game_counter == 2:
-                self.game_counter = 0
+            if self.turn_counter == 2:
+                self.turn_counter = 0
                 if self.level < self.max_level:
                     self.level += 1
                     self.new_level()	
