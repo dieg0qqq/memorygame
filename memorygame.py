@@ -207,7 +207,7 @@ class GameScene(Scene):
 				self.main_image.set_alpha(self.current_alpha)
 				self.record_text.set_alpha(self.current_alpha)
 
-				self.current_alpha -= 3
+				self.current_alpha -= 10
 				if self.current_alpha <= 0:
 				   self.fade = False
 				   self.part = 2
@@ -240,7 +240,6 @@ class GameScene(Scene):
 	def get_event(self, event):
 		if self.part == 2:
 			if self.correct_image_rect.collidepoint(event.pos):
-				self.game.score += 1
 				return 'CORRECT'
 			for rect in self.rects:
 				if not self.correct_image_rect.collidepoint(event.pos) and rect.collidepoint(event.pos):
@@ -325,12 +324,17 @@ class MemoryGame(object):
         icon = pygame.image.load('icon.png')
         pygame.display.set_icon(icon)
 
+        # again we use a dict to store the game_image lists and use the level as the key
+        self.game_images_dict = {}
+
         # Para los niveles y puntuación
         self.level = 1
         self.max_level = 2
         self.turn_counter = 0
+        self.previous_image = None
 		
         self.score = 0
+
         # Creamos un nuevo nivel
         self.new_level()
 
@@ -340,13 +344,14 @@ class MemoryGame(object):
         self.next_scene = None
 
     def new_level(self):
-        self.game_images = []
-        self.turn_counter = 0
+        #self.turn_counter = 0
+        #self.game_images = self.game_images_dict[self.level]
 
 		# we create some GameImage objects here with the images passed to them
 		# they will create their rects and we will let the gamescene class
 		# reposition them
-		
+        self.turn_counter = 0
+        self.game_images = []
         for img in level_dict[self.level]:
 	        game_image = GameImage(img)
 	        self.game_images.append(game_image)
@@ -357,6 +362,7 @@ class MemoryGame(object):
         self.level = 1
         self.turn_counter = 0
         self.new_level()
+        
         self.next_scene = "next_game"
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
@@ -401,6 +407,7 @@ class MemoryGame(object):
             return
 
         elif self.next_scene == "CORRECT":
+            self.score += 1
             self.scene = CorrectScene()
         elif self.next_scene == "INCORRECT":
             self.scene = IncorrectScene()
