@@ -63,14 +63,16 @@ img_dir2 = os.path.join(os.path.dirname(__file__), "Imgs2")
 images1 = [] 
 files = os.listdir(img_dir1)
 for file in files:
-	img = pygame.image.load(os.path.join(img_dir1, file))
-	images1.append(img)
+    img = pygame.image.load(os.path.join(img_dir1, file))
+    img.set_colorkey(WHITE)
+    images1.append(img)
 
 images2 = [] 
 files = os.listdir(img_dir2)
 for file in files:
-	img = pygame.image.load(os.path.join(img_dir2, file))
-	images2.append(img)
+    img = pygame.image.load(os.path.join(img_dir2, file))
+    img.set_colorkey(WHITE)
+    images2.append(img)
 
 # we make a dictionary for the levels and images, so we can switch images using the level (1,2) as the dictionary key, i.e. we can just do:
 # for img in level_dict[self.level]:
@@ -407,7 +409,7 @@ class MemoryGame(object):
             self.scene = GameScene(self, self.game_images, main_image, "game", "Score") 
             self.turn_counter += 1
             
-            if self.turn_counter == 2:
+            if self.turn_counter == 3:
                 self.turn_counter = 0
                 if self.level < self.max_level:
                     self.level += 1
