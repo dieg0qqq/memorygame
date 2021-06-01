@@ -52,51 +52,6 @@ pygame.init()
 fade_event = pygame.USEREVENT + 1
 fade_timer = 10
 
-# this sets the image directory. They are in the same place as the code at present, so we just use this:
-img_dir1 = os.path.join(os.path.dirname(__file__), "Imgs1")
-img_dir2 = os.path.join(os.path.dirname(__file__), "Imgs2")
-
-# you could put the images in their own folder and use this to set the img_dir, as long as the image dir was called "img"!:
-# img_dir = path.join(path.dirname(__file__), "img")
-
-# we load the images here so they are accessible throughout
-images1 = [] 
-files = os.listdir(img_dir1)
-for file in files:
-    img = pygame.image.load(os.path.join(img_dir1, file))
-    img.set_colorkey(WHITE)
-    images1.append(img)
-
-images2 = [] 
-files = os.listdir(img_dir2)
-for file in files:
-    img = pygame.image.load(os.path.join(img_dir2, file))
-    img.set_colorkey(WHITE)
-    images2.append(img)
-
-# we make a dictionary for the levels and images, so we can switch images using the level (1,2) as the dictionary key, i.e. we can just do:
-# for img in level_dict[self.level]:
-# so 1 is the key for the images1 list and 2 is the key for the images 2 list, so we can use the level as a key to get the images for that level.	
-level_dict = { 1 : images1, 2 : images2 }
-
-# the background image
-background_img = pygame.image.load('fondo_memory.png')
-
-# the arrows image
-flechaImg = pygame.image.load('flecha.png')
-
-# set a font for use throughout
-font = pygame.font.SysFont("comicsansms", 70)
-
-# utility function to draw text on the screen - this is unused, I thought it might be useful.  It would be easy to convert the game to use it.
-def draw_text(surface, text, size, x, y):
-    font = pygame.font.Font("comicsansms", size)
-    text_surface = font.render(text, True, PURPLE)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-
-    surface.blit(text_surface, text_rect)   
-
 # this is a utility class to store an image and its rect in one place:
 class GameImage(object):
     def __init__(self, image):
@@ -111,6 +66,43 @@ class GameImage(object):
     def draw(self, surf):
         surf.blit(self.image, self.rect)
 
+# we make a dictionary for the game_image objects and create them here when we load the images.  The level is the index into this in 
+# the game, so we can switch between them using that. Hence, 1 is the key for the level 1 game_image objects and so on
+game_images_dict = {}
+
+# we load the images here so they are accessible throughout. we use os.listdir which just returns a list of strings which are the filenames of
+# the files in that directory. Then we iterate throught them, load the image using pygame.image.load, and create the game_image object
+# from the loaded images and add them to a list, and set that as the value for the key. Index is the key for the dictionary.
+index  = 1
+
+for filename in os.listdir():
+    if filename.startswith("Img"):
+        images = []
+        
+        files = os.listdir(filename)
+        for file in files:
+            img = pygame.image.load(os.path.join(filename, file))
+            img.set_colorkey(WHITE)
+            images.append(GameImage(img))
+        game_images_dict[index] = images
+        index += 1
+
+# the background image
+background_img = pygame.image.load('fondo_memory.png')
+
+# the arrows image
+flechaImg = pygame.image.load('flecha.png')
+
+# here we load the correct and incorrect images which are displayed to the user
+correct_img = pygame.image.load('correct.png')
+correct_img = pygame.transform.scale(correct_img, (400,400))
+
+incorrect_img = pygame.image.load('incorrect.png')
+incorrect_img = pygame.transform.scale(incorrect_img, (400,400))
+
+# set a font for use throughout
+font = pygame.font.SysFont("comicsansms", 70)
+
 # this is the base class for the scenes.  All the scenes inherit from this class
 # so have a get_events() and draw() method
 # sometimes they will have their own draw method but that will call this draw 
@@ -118,9 +110,7 @@ class GameImage(object):
 # background and the flecha image
 
 class Scene(pygame.Surface):
-    def __init__(self, game_images, name, next_scene):
-        self.game_images = game_images
-        self.name = name
+    def __init__(self, next_scene):
         self.next_scene = next_scene
 
         # it has the background image and the flecha img
@@ -146,8 +136,8 @@ class Scene(pygame.Surface):
 
 class IntroScene(Scene):
 
-    def __init__(self, images = None, name = "Intro", next_scene = "next_game"):
-       super().__init__(images, name, next_scene)
+    def __init__(self, next_scene):
+       super().__init__(next_scene)
 
        self.flechaImg_rect = flechaImg.get_rect()
        self.flechaImg_rect.move_ip(1000,500)
@@ -159,128 +149,123 @@ class IntroScene(Scene):
         surf.blit(flechaImg, self.flechaImg_rect)
 
 class GameScene(Scene):
-	def __init__(self, game, images, main_image, name, next_scene):
-		super().__init__(images, name, next_scene)
+    def __init__(self, game, images, main_image, next_scene):
+        super().__init__(next_scene)
 		
-		self.game = game
-		self.main_image = main_image
+        self.game = game
+        self.main_image = main_image
+        self.game_images = images
 
-		# Fade effect set-up
-		self.fade = False
-		self.fade_time = 0
-		self.current_alpha = 255
-		self.part = 1
-		
-		self.record_text = font.render('¡A recordar!',True, PURPLE)
-		self.correct_image_rect = None
+        # Fade effect set-up
+        self.fade = False
+        self.fade_time = 0
+        self.current_alpha = 255
+        self.part = 1
+
+        self.record_text = font.render('¡A recordar!',True, PURPLE)
+        self.correct_image_rect = None
 
 		# Trying to use colliderect so it doesnt overlap
 		# this is the same code as before but adapted to use the gameimage class and the rects stored there
 
-		self.rects = []
+        self.rects = []
 
-		for i in self.game_images:
-			position_set = False 
-			while not position_set:
-				x = random.randint(200,840)
-				y = random.randint(100,600) 
+        for i in self.game_images:
+            position_set = False 
+            while not position_set:
+                x = random.randint(200,840)
+                y = random.randint(100,600) 
 
-				i.rect.x = x
-				i.rect.y = y
+                i.rect.x = x
+                i.rect.y = y
 
-				margin = 10
-				rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
-				if len(self.rects) == 0 or i.rect.collidelist(rl) < 0:
-					self.rects.append(i.rect)
-					position_set = True
+                margin = 10
+                rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
+                if len(self.rects) == 0 or i.rect.collidelist(rl) < 0:
+                    self.rects.append(i.rect)
+                    position_set = True
 
-		# this makes a number and object pair, and allows us to set the correct rects for the correct gameimage classes
-		for i, rect in enumerate(self.rects):
-			self.game_images[i].rect = rect
+        # this makes a number and object pair, and allows us to set the correct rects for the correct gameimage classes
+        for i, rect in enumerate(self.rects):
+            self.game_images[i].rect = rect
 
-	# this is the fade stuff from before that was in draw. It really belongs here tbh
-	def update(self, dt):
-		if self.part == 1 and self.fade:
-			self.fade_time += dt
-			if self.fade_time > fade_timer:
-				self.fade_time = 0
-				self.main_image.set_alpha(self.current_alpha)
-				self.record_text.set_alpha(self.current_alpha)
+    # this is the fade stuff from before that was in draw. It really belongs here tbh
+    def update(self, dt):
+        if self.part == 1 and self.fade:
+            self.fade_time += dt
+            if self.fade_time > fade_timer:
+                self.fade_time = 0
+                self.main_image.set_alpha(self.current_alpha)
+                self.record_text.set_alpha(self.current_alpha)
 
-				self.current_alpha -= 10
-				if self.current_alpha <= 0:
-				   self.fade = False
-				   self.part = 2
+                self.current_alpha -= 10
+                if self.current_alpha <= 0:
+                    self.fade = False
+                    self.part = 2
 
-		else:
-			# we reset the main image alpha otherwise it will be invisible on the next screen (yeah, this one caught me out lol!)
-			self.main_image.set_alpha(255)
+        else:
+            # we reset the main image alpha otherwise it will be invisible on the next screen (yeah, this one caught me out lol!)
+            self.main_image.set_alpha(255)
 
 	# draw is similar to before, but a bit more streamlined as the fade stuff is not in update
-	def draw(self, screen):
-		super().draw(screen)
+    def draw(self, screen):
+        super().draw(screen)
 
-		if self.part == 1:
-			screen.blit(self.record_text, (450, 20))
-			screen.blit(self.main_image.image, (570, 300)) 
+        if self.part == 1:
+            screen.blit(self.record_text, (450, 20))
+            screen.blit(self.main_image.image, (570, 300)) 
+        else:
+            # Second half 
+            text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
+            screen.blit(text2, (350,10))
 
-		else:
-			# Second half 
-			text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
-			screen.blit(text2, (350,10))
+            # Show all similar images	   
+            for game_image in self.game_images:
+                game_image.draw(screen)
 
-			# Show all similar images	   
-			for game_image in self.game_images:
-				game_image.draw(screen)
+            # We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
+            self.correct_image_rect = self.game_images[self.game_images.index(self.main_image)].rect
 
-			# We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
-			self.correct_image_rect = self.game_images[self.game_images.index(self.main_image)].rect
+    # again we pass the event to the game object the same as with the other classes
+    def get_event(self, event):
+        if self.part == 2:
+            if self.game.level == 3:
+                self.game.game_over = True
+            if self.correct_image_rect.collidepoint(event.pos):
+                return 'CORRECT'
+            for rect in self.rects:
+                if not self.correct_image_rect.collidepoint(event.pos) and rect.collidepoint(event.pos):
+                    return 'INCORRECT'    
 
-	# again we pass the event to the game object the same as with the other classes
-	def get_event(self, event):
-		if self.part == 2:
-			if self.correct_image_rect.collidepoint(event.pos):
-				return 'CORRECT'
-			for rect in self.rects:
-				if not self.correct_image_rect.collidepoint(event.pos) and rect.collidepoint(event.pos):
-					return 'INCORRECT'    
+class AnswerScene(Scene):
+    def __init__(self, game, which_answer):
+        self.game = game
+        if not game.game_over:
+            super().__init__("next_game")
+        else:
+            super().__init__("score")
 
-# These are the correct and incorrect scenes that come up when the player clicks on one of the images
-class CorrectScene(Scene):
-    def __init__(self):
-        super().__init__(None, "correct", "next_game")
-        self.correct = pygame.image.load('correct.png')
-        self.correct = pygame.transform.scale(self.correct, (400,400))
+        self.which_asnwer = which_answer
         self.flechaImg_rect = flechaImg.get_rect()
         self.flechaImg_rect.move_ip(1000,500)
 
-    def draw(self, surf):
-        super().draw(surf)
-        text = font.render('¡Correcto!', True, GREEN)
-        surf.blit(text, (500, 40))
-        surf.blit(self.correct, (500,180))
-        surf.blit(flechaImg, self.flechaImg_rect)
+        if self.which_asnwer == "correct":
+            self.image = correct_img.copy()
+            self.text = font.render('¡Correcto!', True, GREEN)
+        else:
+            self.image = incorrect_img.copy()
+            self.text = font.render('¡Incorrecto!', True, RED)
 
-class IncorrectScene(Scene):                        
-    def __init__(self):
-        super().__init__(None, "incorrect", "next_game")
-        self.incorrect = pygame.image.load('incorrect.png')
-        self.incorrect = pygame.transform.scale(self.incorrect, (400,400))
-        self.flechaImg_rect = flechaImg.get_rect()
-        self.flechaImg_rect.move_ip(1000,500)
-
-    def draw(self, surf):
+    def draw(self,surf):
         super().draw(surf)
-        font = pygame.font.SysFont("comicsansms",50)
-        text = font.render('¡Incorrecto!', True, RED)
-        surf.blit(text, (500, 40))
-        surf.blit(self.incorrect, (450,180))
+        surf.blit(self.text, (500, 40))
+        surf.blit(self.image, (490, 180))
         surf.blit(flechaImg, self.flechaImg_rect)
 
 # this shows the score and asks if the player wants to play again
 class ScoreScene(Scene):
 	def __init__(self, score):
-		super().__init__(None, "Score", "new_game")
+		super().__init__("new_game")
 		self.score = str(score)
 		self.score_surf = font.render(self.score, True, PURPLE)
 		self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
@@ -329,9 +314,10 @@ class MemoryGame(object):
 
         # Para los niveles y puntuación
         self.level = 1
-        self.max_level = 2
+        self.max_level = 3
         self.turn_counter = 0
         self.previous_image = None
+        self.game_over = False
 		
         self.score = 0
 
@@ -339,22 +325,13 @@ class MemoryGame(object):
         self.new_level()
 
         # we set the self.scene to point to an instance of the IntroScene and self.next_scene is set to None
-        self.Intro = IntroScene()
+        self.Intro = IntroScene("next_game")
         self.scene = self.Intro
         self.next_scene = None
 
     def new_level(self):
-        #self.turn_counter = 0
-        #self.game_images = self.game_images_dict[self.level]
-
-		# we create some GameImage objects here with the images passed to them
-		# they will create their rects and we will let the gamescene class
-		# reposition them
         self.turn_counter = 0
-        self.game_images = []
-        for img in level_dict[self.level]:
-	        game_image = GameImage(img)
-	        self.game_images.append(game_image)
+        self.game_images = game_images_dict[self.level]
 
     # this is called when we restart the game. It just sets score to 0, level to 1 and so on
     def new_game(self):
@@ -406,25 +383,26 @@ class MemoryGame(object):
             self.scene.update(dt)
             return
 
-        elif self.next_scene == "CORRECT":
+        if self.next_scene == "CORRECT":
             self.score += 1
-            self.scene = CorrectScene()
+            self.scene = AnswerScene(self, "correct")
         elif self.next_scene == "INCORRECT":
-            self.scene = IncorrectScene()
+            self.scene = AnswerScene(self, "incorrect")
         elif self.next_scene == "next_game":
-            main_image = random.choice(self.game_images)
-            self.scene = GameScene(self, self.game_images, main_image, "game", "Score") 
+            main_image = self.previous_image
             self.turn_counter += 1
-            
-            if self.turn_counter == 3:
-                self.turn_counter = 0
+
+            while main_image == self.previous_image:
+                main_image = random.choice(self.game_images)
+
+            self.previous_image = main_image
+            self.scene = GameScene(self,self.game_images,main_image, "Score")
+            if self.turn_counter == 2:
+                self.level += 1
                 if self.level < self.max_level:
-                    self.level += 1
-                    self.new_level()	
-                else:
-                    self.next_scene = "Score"
-                    self.update(0)
-        elif self.next_scene == "Score":
+                    self.new_level()
+        
+        elif self.next_scene == "score":
             self.scene = ScoreScene(self.score)
         elif self.next_scene == "new_game":
             self.new_game()
