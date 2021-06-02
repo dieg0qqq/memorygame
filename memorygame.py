@@ -198,7 +198,7 @@ class GameScene(Scene):
                 self.main_image.set_alpha(self.current_alpha)
                 self.record_text.set_alpha(self.current_alpha)
 
-                self.current_alpha -= 10
+                self.current_alpha -= 5
                 if self.current_alpha <= 0:
                     self.fade = False
                     self.part = 2
@@ -335,6 +335,7 @@ class MemoryGame(object):
 
     # this is called when we restart the game. It just sets score to 0, level to 1 and so on
     def new_game(self):
+        self.game_over = False
         self.score = 0
         self.level = 1
         self.turn_counter = 0
