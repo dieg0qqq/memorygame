@@ -162,7 +162,7 @@ class GameScene(Scene):
         self.current_alpha = 255
         self.part = 1
 
-        self.record_text = font.render('¡A recordar!',True, PURPLE)
+        self.record_text = font.render('Atiende',True, PURPLE)
         self.correct_image_rect = None
 
 		# Trying to use colliderect so it doesnt overlap
@@ -212,12 +212,12 @@ class GameScene(Scene):
         super().draw(screen)
 
         if self.part == 1:
-            screen.blit(self.record_text, (450, 20))
-            screen.blit(self.main_image.image, (570, 300)) 
+            screen.blit(self.record_text, (550, 20))
+            screen.blit(self.main_image.image, (580, 280)) 
         else:
             # Second half 
-            text2 = font.render('¿Cuál era el dibujo?',True, PURPLE)
-            screen.blit(text2, (350,10))
+            text2 = font.render('¿Qué has visto?',True, PURPLE)
+            screen.blit(text2, (400,5))
 
             # Show all similar images	   
             for game_image in self.game_images:
