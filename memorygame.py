@@ -1,34 +1,6 @@
-# Some comments:  I have changed a load of things.  The main game is now a class not just a def. There is a scene class which is the base class for the different scenes (intro, game, correct/incorrect scenes). 
-
-# One of the issues which you have ran into is the scene management.  Usually you would do it similar to how you had it before, with the dictionary of scenes with their names and next scenes:
-
-#   scenes = {
-#        'PORTADA': PORTRAIT('SEGUNDA'),
-#        'SEGUNDA': GAME1('SEGUNDA'),
-#        'CORRECT': CorrectScreen(),
-#        'INCORRECT': WrongScreen(),
-#    }
-
-# So if this was a standard game with an intro screen, the game, and a high scores screen it would look like this:
-
-#     scenes = {
-#        'PORTADA': Intro('SEGUNDA'),
-#        'SEGUNDA': Game('Highs'),
-#        'Highs': Highscore_screen("PORTADA")
-#       }
-
-# and it would start at the intro screen, go on to the game, then the high scores and then loop back to the intro
-
-# The issue here is having the correct and incorrect screens and then looping back and having another scene, so we have to do it a different way. SO what we have is that each scene sends back the next scene.  The intro scene sends back "next_game", the game sends back either "correct" or "incorrect" and we show one of those, and they also send back "next_game" and the game plays again.
-
-# We fade the correct and incorrect images out like in the game, and clicking the flecha image moves to the next game
-
-# If you have any questions, please message me on reddit (not that useless chat thing - I only seem to get chat notifications several hours after someone has sent me something on there lol!)
-
 # Import libraries
 import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
-
 
 # Set size of window
 size = 1280,768
@@ -252,16 +224,14 @@ class AnswerScene(Scene):
         self.flechaImg_rect.move_ip(1000,500)
 
         if self.which_asnwer == "correct":
-            
-
             correct = pygame.mixer.Sound('correct.wav')
-            correct.set_volume(0.5)
+            correct.set_volume(1)
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
         else:
             wrong = pygame.mixer.Sound('incorrect.wav')
-            wrong.set_volume(0.5)
+            wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
             self.text = font.render('¡Incorrecto!', True, RED)
@@ -274,37 +244,37 @@ class AnswerScene(Scene):
 
 # this shows the score and asks if the player wants to play again
 class ScoreScene(Scene):
-	def __init__(self, score):
-		super().__init__("new_game")
-		self.score = str(score)
-		self.score_surf = font.render(self.score, True, PURPLE)
-		self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
+    def __init__(self, score):
+        super().__init__("new_game")
+        self.score = str(score)
+        self.score_surf = font.render(self.score, True, PURPLE)
+        self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
 
-		self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
-		self.yes_rect = self.yes.get_rect()
-		self.yes_rect.move_ip(500, 450)
+        self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
+        self.yes_rect = self.yes.get_rect()
+        self.yes_rect.move_ip(500, 450)
 
-		self.no = font.render("No", True, RED, NAVYBLUE)
-		self.no_rect = self.no.get_rect()
-		self.no_rect.move_ip(650, 450)
+        self.no = font.render("No", True, RED, NAVYBLUE)
+        self.no_rect = self.no.get_rect()
+        self.no_rect.move_ip(650, 450)
 	
-	def get_event(self, event):
-		mouse_pos = event.pos
-		if self.no_rect.collidepoint(mouse_pos):
-			pygame.quit()
-			sys.exit()
-		elif self.yes_rect.collidepoint(mouse_pos):
-			return self.next_scene
+    def get_event(self, event):
+        mouse_pos = event.pos
+        if self.no_rect.collidepoint(mouse_pos):
+            pygame.quit()
+            sys.exit()
+        elif self.yes_rect.collidepoint(mouse_pos):
+            return self.next_scene
 
-	def draw(self, surf):
-		super().draw(surf)
-		font = pygame.font.SysFont("comicsansms",60)
-		text = font.render('Puntuación', True, PURPLE)
-		surf.blit(text, (500, 50))
-		surf.blit(self.score_surf, (620,180))
-		surf.blit(self.play_again, (380, 300))
-		surf.blit(self.yes, self.yes_rect)
-		surf.blit(self.no, self.no_rect)
+    def draw(self, surf):
+        super().draw(surf)
+        font = pygame.font.SysFont("comicsansms",60)
+        text = font.render('Puntuación', True, PURPLE)
+        surf.blit(text, (500, 50))
+        surf.blit(self.score_surf, (620,180))
+        surf.blit(self.play_again, (380, 300))
+        surf.blit(self.yes, self.yes_rect)
+        surf.blit(self.no, self.no_rect)
 
 # instead of just doing def main(), we create a class to run everything
 class MemoryGame(object):
@@ -314,7 +284,7 @@ class MemoryGame(object):
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         pygame.mixer.music.load('bckg_music.mp3')
-        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.set_volume(0.3)
         pygame.mixer.music.play(-1)
 
         # Ponemos el título e icono y fondo de la ventana
@@ -359,7 +329,6 @@ class MemoryGame(object):
     
     # this is the main loop - the code just goes around this over and over
     def run(self):  
-
         # we use "running" as the name of our boolean to keep the 
         # loop running, as we don't want the name to clash with the method 
         # name, which is "run" and we also make it an object variable with
@@ -387,6 +356,9 @@ class MemoryGame(object):
             # the only event we are interested in in the scenes is the mousebuttondown event, so that is the 
             # only event we send. This is why the scenes don't check for event.type == pygame.MOUSEBUTTONDOWN.
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                click = pygame.mixer.Sound('click.wav')
+                click.set_volume(0.3)
+                pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
 
     # the update function. If next scene is None we are in the middle of the game and just update the game
@@ -417,7 +389,13 @@ class MemoryGame(object):
         
         elif self.next_scene == "score":
             self.scene = ScoreScene(self.score)
+            pygame.mixer.music.load('final3.wav')
+            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.play()
         elif self.next_scene == "new_game":
+            pygame.mixer.music.load('bckg_music.mp3')
+            pygame.mixer.music.set_volume(0.4)
+            pygame.mixer.music.play(-1)
             self.new_game()
 
     # draw just passes the screen to the current scene so it can draw itself on it
