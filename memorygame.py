@@ -73,10 +73,10 @@ game_images_dict = {}
 # we load the images here so they are accessible throughout. we use os.listdir which just returns a list of strings which are the filenames of
 # the files in that directory. Then we iterate throught them, load the image using pygame.image.load, and create the game_image object
 # from the loaded images and add them to a list, and set that as the value for the key. Index is the key for the dictionary.
-index  = 1
+index  = 0
 
 for filename in os.listdir():
-    if filename.startswith("Img"):
+    if filename.startswith("Imgs"):
         images = []
         
         files = os.listdir(filename)
@@ -179,7 +179,7 @@ class GameScene(Scene):
                 i.rect.x = x
                 i.rect.y = y
 
-                margin = 10
+                margin = 5
                 rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
                 if len(self.rects) == 0 or i.rect.collidelist(rl) < 0:
                     self.rects.append(i.rect)
@@ -197,7 +197,7 @@ class GameScene(Scene):
                 self.fade_time = 0
                 self.main_image.set_alpha(self.current_alpha)
                 self.record_text.set_alpha(self.current_alpha)
-
+                # Speed whichin the image dissapears
                 self.current_alpha -= 5
                 if self.current_alpha <= 0:
                     self.fade = False
@@ -229,7 +229,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 3:
+            if self.game.level == 10:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -313,12 +313,11 @@ class MemoryGame(object):
         self.game_images_dict = {}
 
         # Para los niveles y puntuación
-        self.level = 1
-        self.max_level = 3
+        self.level = 8
+        self.max_level = 10
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
-		
         self.score = 0
 
         # Creamos un nuevo nivel
@@ -332,15 +331,15 @@ class MemoryGame(object):
     def new_level(self):
         self.turn_counter = 0
         self.game_images = game_images_dict[self.level]
+        print(self.level)
 
     # this is called when we restart the game. It just sets score to 0, level to 1 and so on
     def new_game(self):
         self.game_over = False
         self.score = 0
-        self.level = 1
-        self.turn_counter = 0
-        self.new_level()
+        self.level = 0
         
+        self.new_level()
         self.next_scene = "next_game"
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
