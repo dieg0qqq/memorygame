@@ -26,8 +26,9 @@
 # If you have any questions, please message me on reddit (not that useless chat thing - I only seem to get chat notifications several hours after someone has sent me something on there lol!)
 
 # Import libraries
-import os, sys, pygame, pygame.freetype, random
+import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
+
 
 # Set size of window
 size = 1280,768
@@ -47,6 +48,7 @@ CYAN     = (  0, 255, 255)
 
 # init pygame
 pygame.init()
+pygame.mixer.init()
 
 # the fade events placed into the event queue by the timer 
 fade_event = pygame.USEREVENT + 1
@@ -229,7 +231,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 10:
+            if self.game.level == 11:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -250,9 +252,17 @@ class AnswerScene(Scene):
         self.flechaImg_rect.move_ip(1000,500)
 
         if self.which_asnwer == "correct":
+            
+
+            correct = pygame.mixer.Sound('correct.wav')
+            correct.set_volume(0.5)
+            pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
         else:
+            wrong = pygame.mixer.Sound('incorrect.wav')
+            wrong.set_volume(0.5)
+            pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
             self.text = font.render('¡Incorrecto!', True, RED)
 
@@ -303,6 +313,9 @@ class MemoryGame(object):
         # Definimos las dimensiones de la ventana (1600 x 900px) y reloj
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
+        pygame.mixer.music.load('bckg_music.mp3')
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play(-1)
 
         # Ponemos el título e icono y fondo de la ventana
         pygame.display.set_caption("Memory")
@@ -313,8 +326,8 @@ class MemoryGame(object):
         self.game_images_dict = {}
 
         # Para los niveles y puntuación
-        self.level = 8
-        self.max_level = 10
+        self.level = 0
+        self.max_level = 11
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
@@ -397,7 +410,7 @@ class MemoryGame(object):
 
             self.previous_image = main_image
             self.scene = GameScene(self,self.game_images,main_image, "Score")
-            if self.turn_counter == 2:
+            if self.turn_counter == 1:
                 self.level += 1
                 if self.level < self.max_level:
                     self.new_level()
