@@ -171,7 +171,7 @@ class GameScene(Scene):
         for i in self.game_images:
             position_set = False 
             while not position_set:
-                x = random.randint(200,840)
+                x = random.randint(100,950)
                 y = random.randint(100,600) 
 
                 i.rect.x = x
@@ -227,7 +227,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 12:
+            if self.game.level == 13:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -321,7 +321,7 @@ class MemoryGame(object):
 
         # Para los niveles y puntuación
         self.level = 0
-        self.max_level = 12
+        self.max_level = 13
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
