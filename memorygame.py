@@ -203,7 +203,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 11:
+            if self.game.level == 12:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -225,13 +225,13 @@ class AnswerScene(Scene):
 
         if self.which_asnwer == "correct":
             correct = pygame.mixer.Sound('correct.wav')
-            correct.set_volume(1)
+            correct.set_volume(0.6)
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
         else:
             wrong = pygame.mixer.Sound('incorrect.wav')
-            wrong.set_volume(1)
+            wrong.set_volume(0.6)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
             self.text = font.render('¡Incorrecto!', True, RED)
@@ -284,7 +284,7 @@ class MemoryGame(object):
         self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         pygame.mixer.music.load('bckg_music.mp3')
-        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
 
         # Ponemos el título e icono y fondo de la ventana
@@ -296,8 +296,8 @@ class MemoryGame(object):
         self.game_images_dict = {}
 
         # Para los niveles y puntuación
-        self.level = 0
-        self.max_level = 11
+        self.level = 11
+        self.max_level = 12
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
@@ -390,11 +390,11 @@ class MemoryGame(object):
         elif self.next_scene == "score":
             self.scene = ScoreScene(self.score)
             pygame.mixer.music.load('final3.wav')
-            pygame.mixer.music.set_volume(0.5)
+            pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play()
         elif self.next_scene == "new_game":
             pygame.mixer.music.load('bckg_music.mp3')
-            pygame.mixer.music.set_volume(0.4)
+            pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.play(-1)
             self.new_game()
 
