@@ -22,6 +22,10 @@ CYAN     = (  0, 255, 255)
 pygame.init()
 pygame.mixer.init()
 
+# inititialise the screen here
+screen = pygame.display.set_mode(size)
+screenrect = screen.get_rect()
+
 # the fade events placed into the event queue by the timer 
 fade_event = pygame.USEREVENT + 1
 fade_timer = 10
@@ -61,6 +65,9 @@ for filename in os.listdir():
         game_images_dict[index] = images
         index += 1
 
+# subtract one from index so it is now the same as the amount of levels
+index -= 1 
+
 # the background image
 background_img = pygame.image.load('fondo_memory.png')
 
@@ -85,6 +92,7 @@ font = pygame.font.SysFont("comicsansms", 70)
 
 class Scene(pygame.Surface):
     def __init__(self, next_scene):
+        self.rect = pygame.Rect(screenrect)
         self.next_scene = next_scene
 
         # it has the background image and the flecha img
@@ -121,6 +129,22 @@ class IntroScene(Scene):
         img = font.render('Memory',True, PURPLE)
         surf.blit(img, (500,334)) 
         surf.blit(flechaImg, self.flechaImg_rect)
+
+class MenuScene(Scene):
+
+    def __init__(self, game):
+        super().__init__(None)
+        self.game = game
+
+        font = pygame.fon.SysFont("comicsansms", 24)
+
+        y = 20
+        self.levels = ["Colores I", "Colores II", "Figuras geométricas 2D", "Figuras geométricas 3D", "Dibujos de animales", "Dibujos de vehículos"]
+        self.levels_rects = []
+        for count in range(index):
+            level_rect = self.levels[count].get_rect()
+            
+
 
 class GameScene(Scene):
     def __init__(self, game, images, main_image, next_scene):
@@ -281,7 +305,7 @@ class MemoryGame(object):
     def __init__(self):
         # all the initalisation is done here
         # Definimos las dimensiones de la ventana (1600 x 900px) y reloj
-        self.screen = pygame.display.set_mode(size)
+        self.screen = screen
         self.clock = pygame.time.Clock()
         pygame.mixer.music.load('bckg_music.mp3')
         pygame.mixer.music.set_volume(0.2)
@@ -296,7 +320,7 @@ class MemoryGame(object):
         self.game_images_dict = {}
 
         # Para los niveles y puntuación
-        self.level = 11
+        self.level = 0
         self.max_level = 12
         self.turn_counter = 0
         self.previous_image = None
