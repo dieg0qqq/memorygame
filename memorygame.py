@@ -1,6 +1,7 @@
 # Import libraries
 import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
+from random import randint
 
 # Set size of window
 size = 1280,768
@@ -62,6 +63,8 @@ for filename in os.listdir():
             img = pygame.image.load(os.path.join(filename, file))
             img.set_colorkey(WHITE)
             images.append(GameImage(img))
+                
+        random.shuffle(images)
         game_images_dict[index] = images
         index += 1
 
@@ -165,7 +168,6 @@ class GameScene(Scene):
 
 		# Trying to use colliderect so it doesnt overlap
 		# this is the same code as before but adapted to use the gameimage class and the rects stored there
-
         self.rects = []
 
     # this is the fade stuff from before that was in draw. It really belongs here tbh
@@ -214,10 +216,13 @@ class GameScene(Scene):
             text2 = font.render('¿Qué has visto?',True, PURPLE)
             screen.blit(text2, (400,5))
 
-            # Show all similar images	   
+            # Show all similar images
+            cont = 0	   
+            
             for game_image in self.game_images:
+                
                 game_image.draw(screen)
-
+                cont += 1
             # We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
             self.correct_image_rect = self.game_images[self.game_images.index(self.main_image)].rect
 
@@ -403,7 +408,7 @@ class MemoryGame(object):
 
             self.previous_image = main_image
             self.scene = GameScene(self,self.game_images,main_image, "Score")
-            if self.turn_counter == 1:
+            if self.turn_counter == 2:
                 self.level += 1
                 if self.level < self.max_level:
                     self.new_level()
