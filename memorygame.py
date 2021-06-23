@@ -168,27 +168,24 @@ class GameScene(Scene):
 
         self.rects = []
 
-        for i in self.game_images:
-            position_set = False 
-            while not position_set:
-                x = random.randint(100,950)
-                y = random.randint(100,600) 
-
-                i.rect.x = x
-                i.rect.y = y
-
-                margin = 5
-                rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
-                if len(self.rects) == 0 or i.rect.collidelist(rl) < 0:
-                    self.rects.append(i.rect)
-                    position_set = True
-
-        # this makes a number and object pair, and allows us to set the correct rects for the correct gameimage classes
-        for i, rect in enumerate(self.rects):
-            self.game_images[i].rect = rect
-
     # this is the fade stuff from before that was in draw. It really belongs here tbh
     def update(self, dt):
+
+        if len(self.rects) < len(self.game_images):
+            i = len(self.rects)
+            
+            x = random.randint(100,950)
+            y = random.randint(100,600) 
+
+            self.game_images[i].rect.x = x
+            self.game_images[i].rect.y = y
+
+            margin = 5
+            rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
+            if len(self.rects) == 0 or self.game_images[i].rect.collidelist(rl) < 0:
+                self.rects.append(self.game_images[i].rect)
+                
+
         if self.part == 1 and self.fade:
             self.fade_time += dt
             if self.fade_time > fade_timer:
