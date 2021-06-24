@@ -286,9 +286,7 @@ class GameScene(Scene):
 
         if self.part == 1:
             screen.blit(self.record_text, self.record_text_rect)
-            # x = self.main_image.rect.x.center
-            # y = self.main_image.rect.y.center
-            screen.blit(self.main_image.image, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)) 
+            screen.blit(self.main_image.image, (540,270)) 
         else:
             # Second half 
             text2 = font.render('¿Qué has visto?',True, PURPLE)
