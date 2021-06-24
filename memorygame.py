@@ -4,6 +4,8 @@ from pygame.locals import *
 
 # Set size of window
 size = 1280,768
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 768
 
 # Colours   R   G   B
 GRAY     = (100, 100, 100)
@@ -62,13 +64,12 @@ for filename in os.listdir():
             img = pygame.image.load(os.path.join(filename, file))
             img.set_colorkey(WHITE)
             images.append(GameImage(img))
-                
-        # random.shuffle(images)
+
         game_images_dict[index] = images
         index += 1
 
 # subtract one from index so it is now the same as the amount of levels
-index -= 1 
+
 
 # the background image
 background_img = pygame.image.load('fondo_memory.png')
@@ -86,45 +87,48 @@ incorrect_img = pygame.transform.scale(incorrect_img, (400,400))
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
 
+# level names
+
 level_names = ["Colores I", "Colores II", "Formas Geométricas 2D", "Formas Geométricas 3D", 
 "Dibujos Animales", "Dibujos Transportes", "Letras", 
 "Palabras Mayúsculas","Palabras Minúsculas" ,"Pictogramas Emociones I", 
 "Pictogramas Emociones II", "Fotos Emociones", "Personas en Acción",]
 
+# simple button class for the menu
 class Button(pygame.Surface):
     def __init__(self, text):
+        
         self.text = text
-        font_level = pygame.font.SysFont("comicsansms", 40)
-        self.text_surf = font_level.render(text, True, PURPLE)
-        self.text_surf.set_colorkey(BLACK)
+        font = pygame.font.SysFont("comicsansms", 30)
+        self.text_surf = font.render(text, True, PURPLE)
+        self.text_surf2 = font.render(text, True, RED)
         width = self.text_surf.get_width()
         height = self.text_surf.get_height()
-
+        
         super().__init__((width, height), flags=SRCALPHA)
-        self.set_colorkey(BLACK)
         self.rect = self.get_rect()
-
+           
         self.selected_surf = pygame.Surface((self.rect.width, self.rect.height))
         self.selected_surf.fill(WHITE)
         self.selected = False
         self.blit(self.text_surf, (0,0))
-    
+   
     def update(self):
         if self.selected:
-            self.blit(self.selected_surf, (0,0))
-            self.blit(self.text_surf, (0,0))
+            self.blit(self.selected_surf, (0, 0)) #, special_flags=pygame.BLEND_MULT)
+            self.blit(self.text_surf2, (0,0))
         else:
             self.blit(self.text_surf, (0,0))
-
+           
     def draw(self, surf):
         surf.blit(self, self.rect)
-
+    
     def __str__(self):
-        data = "text = " + self.text + "\n"
-        data += "rect = " + str(self.rect)
-
-        return data
-
+    	data = "text = " + self.text + "\n"
+    	data += "rect = " + str(self.rect)
+    	
+    	return data 
+    
 # this is the base class for the scenes.  All the scenes inherit from this class
 # so have a get_events() and draw() method
 # sometimes they will have their own draw method but that will call this draw 
@@ -156,7 +160,6 @@ class Scene(pygame.Surface):
     def draw(self, surf):
         surf.blit(self.background_img, (0,0))
         
-
 class IntroScene(Scene):
 
     def __init__(self, next_scene):
@@ -168,7 +171,8 @@ class IntroScene(Scene):
     def draw(self, surf):
         super().draw(surf)
         img = font.render('Memory',True, PURPLE)
-        surf.blit(img, (500,334)) 
+        img_rect = img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        surf.blit(img, img_rect) 
         surf.blit(flechaImg, self.flechaImg_rect)
 
 class MenuScene(Scene):
@@ -176,10 +180,12 @@ class MenuScene(Scene):
     def __init__(self, game):
         super().__init__(None)
         self.game = game
-        #font = pygame.font.SysFont("comicsansms", 24)
-        y = 50      
+        self.flechaImg_rect = flechaImg.get_rect()
+        self.flechaImg_rect.move_ip(1000,500)
+
+        y = 100
         self.level_buttons = []
-        
+
         for count in range(index):
             level_text = level_names[count]
             b = Button(level_text)
@@ -188,37 +194,43 @@ class MenuScene(Scene):
             y += 50
             self.level_buttons.append(b)
 
-    def draw(self, surf):
-        super().draw(surf)
-        
-        img = font.render('Niveles',True, PURPLE)
-        surf.blit(img, (500,20)) 
-        surf.blit(flechaImg, self.flechaImg_rect)     
-
-        for button in self.level_buttons:
-            button.draw(surf)   
-
     def get_event(self, event):
         for i, button in enumerate(self.level_buttons):
             if button.rect.collidepoint(event.pos):
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.game.set_level(i)
-                    return "next_game"
-                else: 
-                    button.selected = True
-                    button.update()
+                 if event.type == pygame.MOUSEBUTTONDOWN:
+                     self.game.set_level(i)
+                     return "next_game"
+                 else:
+                      button.selected = True
+                      button.update()
+            
+            elif self.flechaImg_rect.collidepoint(event.pos):
+                pygame.time.set_timer(fade_event, 1000)
+                return "next_game"
+
             else:
                 button.selected = False
                 button.update()
 
+    def draw(self, surf):
+        super().draw(surf)
+        font_name = pygame.font.SysFont("comicsansms", 60)
+        img = font_name.render('Niveles',True, BLACK)
+        img_rect = img.get_rect(center=(SCREEN_WIDTH/2, 50))
+        surf.blit(img, img_rect) 
 
+        for button in self.level_buttons:
+            button.draw(surf)
 
+        surf.blit(flechaImg, self.flechaImg_rect)
+            
 class GameScene(Scene):
     def __init__(self, game, images, main_image, next_scene, ordered = False):
         super().__init__(next_scene)
-		
+        
         self.game = game
         self.main_image = main_image
+        self.main_image_rect = self.main_image.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
         self.game_images = images
 
         # Fade effect set-up
@@ -228,10 +240,11 @@ class GameScene(Scene):
         self.part = 1
 
         self.record_text = font.render('Atiende',True, PURPLE)
+        self.record_text_rect = self.record_text.get_rect(center=(SCREEN_WIDTH/2, 70))
         self.correct_image_rect = None
 
-		# Trying to use colliderect so it doesnt overlap
-		# this is the same code as before but adapted to use the gameimage class and the rects stored there
+        # Trying to use colliderect so it doesnt overlap
+        # this is the same code as before but adapted to use the gameimage class and the rects stored there
         self.rects = []
 
     # this is the fade stuff from before that was in draw. It really belongs here tbh
@@ -250,7 +263,6 @@ class GameScene(Scene):
             rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
             if len(self.rects) == 0 or self.game_images[i].rect.collidelist(rl) < 0:
                 self.rects.append(self.game_images[i].rect)
-                
 
         if self.part == 1 and self.fade:
             self.fade_time += dt
@@ -258,6 +270,7 @@ class GameScene(Scene):
                 self.fade_time = 0
                 self.main_image.set_alpha(self.current_alpha)
                 self.record_text.set_alpha(self.current_alpha)
+
                 # Speed whichin the image dissapears
                 self.current_alpha -= 5
                 if self.current_alpha <= 0:
@@ -268,23 +281,21 @@ class GameScene(Scene):
             # we reset the main image alpha otherwise it will be invisible on the next screen (yeah, this one caught me out lol!)
             self.main_image.set_alpha(255)
 
-	# draw is similar to before, but a bit more streamlined as the fade stuff is not in update
+    # draw is similar to before, but a bit more streamlined as the fade stuff is not in update
     def draw(self, screen):
         super().draw(screen)
 
         if self.part == 1:
-            screen.blit(self.record_text, (550, 20))
-            screen.blit(self.main_image.image, (580, 280)) 
+            screen.blit(self.record_text, self.record_text_rect)
+            screen.blit(self.main_image.image, self.main_image_rect) 
         else:
             # Second half 
             text2 = font.render('¿Qué has visto?',True, PURPLE)
             screen.blit(text2, (400,5))
 
-            # Show all similar images
-            cont = 0	   
-            
+            # Show all similar images       
+            cont = 0
             for game_image in self.game_images:
-                
                 game_image.draw(screen)
                 cont += 1
             # We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
@@ -315,13 +326,13 @@ class AnswerScene(Scene):
 
         if self.which_asnwer == "correct":
             correct = pygame.mixer.Sound('correct.wav')
-            correct.set_volume(0.6)
+            correct.set_volume(1)
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
         else:
             wrong = pygame.mixer.Sound('incorrect.wav')
-            wrong.set_volume(0.6)
+            wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
             self.text = font.render('¡Incorrecto!', True, RED)
@@ -337,8 +348,10 @@ class ScoreScene(Scene):
     def __init__(self, score):
         super().__init__("new_game")
         self.score = str(score)
-        self.score_surf = font.render(self.score, True, PURPLE)
+        self.score_surf = font.render(self.score, True, RED)
+        self.score_surf_rect = self.score_surf.get_rect(center=(SCREEN_WIDTH/2, 330))
         self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
+        self.play_again_rect = self.play_again.get_rect(center=(SCREEN_WIDTH/2, 70))
 
         self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
         self.yes_rect = self.yes.get_rect()
@@ -347,7 +360,7 @@ class ScoreScene(Scene):
         self.no = font.render("No", True, RED, NAVYBLUE)
         self.no_rect = self.no.get_rect()
         self.no_rect.move_ip(650, 450)
-	
+    
     def get_event(self, event):
         mouse_pos = event.pos
         if self.no_rect.collidepoint(mouse_pos):
@@ -360,9 +373,10 @@ class ScoreScene(Scene):
         super().draw(surf)
         font = pygame.font.SysFont("comicsansms",60)
         text = font.render('Puntuación', True, PURPLE)
-        surf.blit(text, (500, 50))
-        surf.blit(self.score_surf, (620,180))
-        surf.blit(self.play_again, (380, 300))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH/2, 200))
+        surf.blit(text, text_rect)
+        surf.blit(self.score_surf, self.score_surf_rect)
+        surf.blit(self.play_again, self.play_again_rect)
         surf.blit(self.yes, self.yes_rect)
         surf.blit(self.no, self.no_rect)
 
@@ -373,6 +387,7 @@ class MemoryGame(object):
         # Definimos las dimensiones de la ventana (1600 x 900px) y reloj
         self.screen = screen
         self.clock = pygame.time.Clock()
+        
         pygame.mixer.music.load('bckg_music.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
@@ -411,7 +426,7 @@ class MemoryGame(object):
         self.game_images = game_images_dict[level]
         self.level = level
         pygame.time.set_timer(fade_event, 1000)
-    
+        
     # this is called when we restart the game. It just sets score to 0, level to 1 and so on
     def new_game(self):
         self.game_over = False
@@ -419,7 +434,7 @@ class MemoryGame(object):
         self.level = 0
         
         self.new_level()
-        self.next_scene = "next_game"
+        self.next_scene = "Menu"
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
     
@@ -456,11 +471,11 @@ class MemoryGame(object):
                 click.set_volume(0.3)
                 pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
-            
+
             elif event.type == pygame.MOUSEMOTION:
                 if isinstance(self.scene, MenuScene):
                     self.scene.get_event(event)
-
+                    
     # the update function. If next scene is None we are in the middle of the game and just update the game
     # else if one of the classes sets next_scene we move to the next_scene. 
     def update(self, dt):
@@ -474,7 +489,7 @@ class MemoryGame(object):
         elif self.next_scene == "INCORRECT":
             self.scene = AnswerScene(self, "incorrect")
         elif self.next_scene == "Menu":
-            self.scene == MenuScene(self)
+            self.scene = MenuScene(self)
         elif self.next_scene == "next_game":
             main_image = self.previous_image
             self.turn_counter += 1
@@ -495,9 +510,9 @@ class MemoryGame(object):
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play()
         elif self.next_scene == "new_game":
-            pygame.mixer.music.load('bckg_music.mp3')
-            pygame.mixer.music.set_volume(0.2)
-            pygame.mixer.music.play(-1)
+            #pygame.mixer.music.load('bckg_music.mp3')
+            #pygame.mixer.music.set_volume(0.2)
+            #pygame.mixer.music.play(-1)
             self.new_game()
 
     # draw just passes the screen to the current scene so it can draw itself on it
