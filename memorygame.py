@@ -225,12 +225,11 @@ class MenuScene(Scene):
         surf.blit(flechaImg, self.flechaImg_rect)
             
 class GameScene(Scene):
-    def __init__(self, game, images, main_image, next_scene, ordered = False):
+    def __init__(self, game, images, main_image, next_scene):
         super().__init__(next_scene)
         
         self.game = game
         self.main_image = main_image
-        self.main_image_rect = self.main_image.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
         self.game_images = images
 
         # Fade effect set-up
@@ -287,7 +286,9 @@ class GameScene(Scene):
 
         if self.part == 1:
             screen.blit(self.record_text, self.record_text_rect)
-            screen.blit(self.main_image.image, self.main_image_rect) 
+            # x = self.main_image.rect.x.center
+            # y = self.main_image.rect.y.center
+            screen.blit(self.main_image.image, (SCREEN_WIDTH/2, SCREEN_HEIGHT/2)) 
         else:
             # Second half 
             text2 = font.render('¿Qué has visto?',True, PURPLE)
