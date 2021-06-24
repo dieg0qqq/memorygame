@@ -64,7 +64,7 @@ for filename in os.listdir():
             img.set_colorkey(WHITE)
             images.append(GameImage(img))
                 
-        random.shuffle(images)
+        # random.shuffle(images)
         game_images_dict[index] = images
         index += 1
 
@@ -86,6 +86,44 @@ incorrect_img = pygame.transform.scale(incorrect_img, (400,400))
 
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
+
+level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
+"Dibujos Animales", "Dibujos Transportes", "Dibujos Deportes", "Letras", 
+"Palabras", "Pictogramas Emociones", "Fotos Emociones", "Personas en Acción",]
+
+class Button(pygame.Surface):
+    def __init__(self, text):
+        self.text = text
+        font_level = pygame.font.SysFont("comicsansms", 40)
+        self.text_surf = font_level.render(text, True, PURPLE)
+        self.text_surf.set_colorkey(BLACK)
+        width = self.text_surf.get_width()
+        height = self.text_surf.get_height()
+
+        super().__init__((width, height), flags=SRCALPHA)
+        self.set_colorkey(BLACK)
+        self.rect = self.get_rect()
+
+        self.selected_surf = pygame.Surface((self.rect.width, self.rect.height))
+        self.selected_surf.fill(WHITE)
+        self.selected = False
+        self.blit(self.text_surf, (0,0))
+    
+    def update(self):
+        if self.selected:
+            self.blit(self.selected_surf, (0,0))
+            self.blit(self.text_surf, (0,0))
+        else:
+            self.blit(self.text_surf, (0,0))
+
+    def draw(self, surf):
+        surf.blit(self, self.rect)
+
+    def __str__(self):
+        data = "text = " + self.text + "\n"
+        data += "rect = " + str(self.rect)
+
+        return data
 
 # this is the base class for the scenes.  All the scenes inherit from this class
 # so have a get_events() and draw() method
@@ -139,14 +177,41 @@ class MenuScene(Scene):
         super().__init__(None)
         self.game = game
 
-        font = pygame.fon.SysFont("comicsansms", 24)
+        #font = pygame.font.SysFont("comicsansms", 24)
 
-        y = 20
-        self.levels = ["Colores I", "Colores II", "Figuras geométricas 2D", "Figuras geométricas 3D", "Dibujos de animales", "Dibujos de vehículos"]
-        self.levels_rects = []
+        y = 50
+        
+        self.level_buttons = []
         for count in range(index):
-            level_rect = self.levels[count].get_rect()
-            
+            level_text = level_names[count]
+            b = Button(level_text)
+            b.rect.centerx =self.rect.centerx
+            b.rect.y = self.rect.y + y
+            y += 50
+            self.level_buttons.append(b)
+
+    def draw(self, surf):
+        super().draw(surf)
+        img = font.render('Niveles',True, PURPLE)
+        surf.blit(img, (500,20)) 
+        surf.blit(flechaImg, self.flechaImg_rect)     
+
+        for button in self.levels_buttons:
+            button.draw(surf)   
+
+    def get_event(self, event):
+        for i, button in enumerate(self.levels_buttons):
+            if button.rect.collidepoint(event.pos):
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.game.set_level(i)
+                    return "next_game"
+                else: 
+                    button.selected = True
+                    button.update()
+            else:
+                button.selected = False
+                button.update()
+
 
 
 class GameScene(Scene):
@@ -333,7 +398,7 @@ class MemoryGame(object):
         self.new_level()
 
         # we set the self.scene to point to an instance of the IntroScene and self.next_scene is set to None
-        self.Intro = IntroScene("next_game")
+        self.Intro = IntroScene("Menu")
         self.scene = self.Intro
         self.next_scene = None
 
@@ -349,7 +414,7 @@ class MemoryGame(object):
         self.level = 0
         
         self.new_level()
-        self.next_scene = "next_game"
+        self.next_scene = "Menu"
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
     
@@ -386,6 +451,10 @@ class MemoryGame(object):
                 click.set_volume(0.3)
                 pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
+            
+            elif event.type == pygame.MOUSEMOTION:
+                if isinstance(self.scene, MenuScene):
+                    self.scene.get_event(event)
 
     # the update function. If next scene is None we are in the middle of the game and just update the game
     # else if one of the classes sets next_scene we move to the next_scene. 
@@ -399,6 +468,8 @@ class MemoryGame(object):
             self.scene = AnswerScene(self, "correct")
         elif self.next_scene == "INCORRECT":
             self.scene = AnswerScene(self, "incorrect")
+        elif self.next_scene == "Menu":
+            self.scene == MenuScene(self)
         elif self.next_scene == "next_game":
             main_image = self.previous_image
             self.turn_counter += 1
