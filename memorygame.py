@@ -1,7 +1,6 @@
 # Import libraries
 import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
-from random import randint
 
 # Set size of window
 size = 1280,768
@@ -87,9 +86,10 @@ incorrect_img = pygame.transform.scale(incorrect_img, (400,400))
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
 
-level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
-"Dibujos Animales", "Dibujos Transportes", "Dibujos Deportes", "Letras", 
-"Palabras", "Pictogramas Emociones", "Fotos Emociones", "Personas en Acción",]
+level_names = ["Colores I", "Colores II", "Formas Geométricas 2D", "Formas Geométricas 3D", 
+"Dibujos Animales", "Dibujos Transportes", "Letras", 
+"Palabras Mayúsculas","Palabras Minúsculas" ,"Pictogramas Emociones I", 
+"Pictogramas Emociones II", "Fotos Emociones", "Personas en Acción",]
 
 class Button(pygame.Surface):
     def __init__(self, text):
@@ -176,22 +176,21 @@ class MenuScene(Scene):
     def __init__(self, game):
         super().__init__(None)
         self.game = game
-
         #font = pygame.font.SysFont("comicsansms", 24)
-
-        y = 50
-        
+        y = 50      
         self.level_buttons = []
+        
         for count in range(index):
             level_text = level_names[count]
             b = Button(level_text)
-            b.rect.centerx =self.rect.centerx
-            b.rect.y = self.rect.y + y
+            b.rect.centerx = screenrect.centerx
+            b.rect.y = y
             y += 50
             self.level_buttons.append(b)
 
     def draw(self, surf):
         super().draw(surf)
+        
         img = font.render('Niveles',True, PURPLE)
         surf.blit(img, (500,20)) 
         surf.blit(flechaImg, self.flechaImg_rect)     
@@ -215,7 +214,7 @@ class MenuScene(Scene):
 
 
 class GameScene(Scene):
-    def __init__(self, game, images, main_image, next_scene):
+    def __init__(self, game, images, main_image, next_scene, ordered = False):
         super().__init__(next_scene)
 		
         self.game = game
@@ -407,6 +406,12 @@ class MemoryGame(object):
         self.game_images = game_images_dict[self.level]
         print(self.level)
 
+    def set_level(self, level):
+        self.turn_counter = 0
+        self.game_images = game_images_dict[level]
+        self.level = level
+        pygame.time.set_timer(fade_event, 1000)
+    
     # this is called when we restart the game. It just sets score to 0, level to 1 and so on
     def new_game(self):
         self.game_over = False
@@ -414,7 +419,7 @@ class MemoryGame(object):
         self.level = 0
         
         self.new_level()
-        self.next_scene = "Menu"
+        self.next_scene = "next_game"
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
     
