@@ -196,11 +196,11 @@ class MenuScene(Scene):
         surf.blit(img, (500,20)) 
         surf.blit(flechaImg, self.flechaImg_rect)     
 
-        for button in self.levels_buttons:
+        for button in self.level_buttons:
             button.draw(surf)   
 
     def get_event(self, event):
-        for i, button in enumerate(self.levels_buttons):
+        for i, button in enumerate(self.level_buttons):
             if button.rect.collidepoint(event.pos):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.game.set_level(i)
