@@ -58,18 +58,21 @@ index  = 0
 for filename in os.listdir():
     if filename.startswith("Imgs"):
         images = []
-        
+        cont = 0
         files = os.listdir(filename)
+        random.shuffle(files)
+        
         for file in files:
             img = pygame.image.load(os.path.join(filename, file))
             img.set_colorkey(WHITE)
-            images.append(GameImage(img))
+            
+            if cont < 6:
+                images.append(GameImage(img))
+            cont += 1
 
         game_images_dict[index] = images
         index += 1
-
-# subtract one from index so it is now the same as the amount of levels
-
+        # cont = min(6, len(files))
 
 # the background image
 background_img = pygame.image.load('fondo_memory.png')
@@ -245,10 +248,11 @@ class GameScene(Scene):
         # Trying to use colliderect so it doesnt overlap
         # this is the same code as before but adapted to use the gameimage class and the rects stored there
         self.rects = []
-
+        
     # this is the fade stuff from before that was in draw. It really belongs here tbh
     def update(self, dt):
-
+        
+        
         if len(self.rects) < len(self.game_images):
             i = len(self.rects)
             
@@ -279,11 +283,11 @@ class GameScene(Scene):
         else:
             # we reset the main image alpha otherwise it will be invisible on the next screen (yeah, this one caught me out lol!)
             self.main_image.set_alpha(255)
-
+        
     # draw is similar to before, but a bit more streamlined as the fade stuff is not in update
     def draw(self, screen):
         super().draw(screen)
-
+        
         if self.part == 1:
             screen.blit(self.record_text, self.record_text_rect)
             screen.blit(self.main_image.image, (540,270)) 
@@ -291,6 +295,7 @@ class GameScene(Scene):
             # Second half 
             text2 = font.render('¿Qué has visto?',True, PURPLE)
             screen.blit(text2, (400,5))
+            
 
             # Show all similar images       
             cont = 0
