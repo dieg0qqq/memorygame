@@ -61,7 +61,6 @@ for filename in os.listdir():
         cont = 0
         files = os.listdir(filename)
         random.shuffle(files)
-        
         for file in files:
             img = pygame.image.load(os.path.join(filename, file))
             img.set_colorkey(WHITE)
@@ -93,9 +92,9 @@ font = pygame.font.SysFont("comicsansms", 70)
 # level names
 
 level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
-"Dibujos Animales", "Dibujos Transportes", "Letras", 
-"Palabras Mayúsculas","Palabras Minúsculas" ,"Pictogramas Emociones I", 
-"Pictogramas Emociones II", "Fotos Emociones", "Personas en Acción",]
+"Dibujos Animales", "Dibujos Transportes I", "Dibujos Transportes II", 
+"Dibujos Deportes", "Letras", "Palabras Mayúsculas","Palabras Minúsculas" ,
+"Pictogramas Emociones", "Fotos Emociones", "Personas en Acción"]
 
 # simple button class for the menu
 class Button(pygame.Surface):
@@ -308,7 +307,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 12:
+            if self.game.level == 13:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -329,13 +328,13 @@ class AnswerScene(Scene):
         self.flechaImg_rect.move_ip(1000,500)
 
         if self.which_asnwer == "correct":
-            correct = pygame.mixer.Sound('correct.wav')
+            correct = pygame.mixer.Sound('music/correct.wav')
             correct.set_volume(1)
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
         else:
-            wrong = pygame.mixer.Sound('incorrect.wav')
+            wrong = pygame.mixer.Sound('music/incorrect.wav')
             wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
@@ -392,7 +391,7 @@ class MemoryGame(object):
         self.screen = screen
         self.clock = pygame.time.Clock()
         
-        pygame.mixer.music.load('bckg_music.mp3')
+        pygame.mixer.music.load('music/bckg_music.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
 
@@ -406,7 +405,7 @@ class MemoryGame(object):
 
         # Para los niveles y puntuación
         self.level = 0
-        self.max_level = 12
+        self.max_level = 13
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
@@ -471,7 +470,7 @@ class MemoryGame(object):
             # the only event we are interested in in the scenes is the mousebuttondown event, so that is the 
             # only event we send. This is why the scenes don't check for event.type == pygame.MOUSEBUTTONDOWN.
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                click = pygame.mixer.Sound('click.wav')
+                click = pygame.mixer.Sound('music/click.wav')
                 click.set_volume(0.3)
                 pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
@@ -510,13 +509,13 @@ class MemoryGame(object):
         
         elif self.next_scene == "score":
             self.scene = ScoreScene(self.score)
-            pygame.mixer.music.load('final3.wav')
+            pygame.mixer.music.load('music/final3.wav')
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play()
         elif self.next_scene == "new_game":
-            #pygame.mixer.music.load('bckg_music.mp3')
-            #pygame.mixer.music.set_volume(0.2)
-            #pygame.mixer.music.play(-1)
+            pygame.mixer.music.load('music/bckg_music.mp3')
+            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.play(-1)
             self.new_game()
 
     # draw just passes the screen to the current scene so it can draw itself on it
