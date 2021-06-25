@@ -92,7 +92,7 @@ font = pygame.font.SysFont("comicsansms", 70)
 
 # level names
 
-level_names = ["Colores I", "Colores II", "Formas Geométricas 2D", "Formas Geométricas 3D", 
+level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
 "Dibujos Animales", "Dibujos Transportes", "Letras", 
 "Palabras Mayúsculas","Palabras Minúsculas" ,"Pictogramas Emociones I", 
 "Pictogramas Emociones II", "Fotos Emociones", "Personas en Acción",]
@@ -308,7 +308,7 @@ class GameScene(Scene):
     # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
-            if self.game.level == 13:
+            if self.game.level == 12:
                 self.game.game_over = True
             if self.correct_image_rect.collidepoint(event.pos):
                 return 'CORRECT'
@@ -406,7 +406,7 @@ class MemoryGame(object):
 
         # Para los niveles y puntuación
         self.level = 0
-        self.max_level = 13
+        self.max_level = 12
         self.turn_counter = 0
         self.previous_image = None
         self.game_over = False
