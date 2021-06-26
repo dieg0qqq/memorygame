@@ -435,7 +435,26 @@ class MemoryGame(object):
         self.game_over = False
         self.score = 0
         self.level = 0
-        
+
+        # To reset the new images so they don´t repeat all the time you new game
+        index = 0
+        for filename in os.listdir():
+            if filename.startswith("Imgs"):
+                images = []
+                cont = 0
+                files = os.listdir(filename)
+                random.shuffle(files)
+                for file in files:
+                    img = pygame.image.load(os.path.join(filename, file))
+                    img.set_colorkey(WHITE)
+                    
+                    if cont < 6:
+                        images.append(GameImage(img))
+                    cont += 1
+
+                game_images_dict[index] = images
+                index += 1
+
         self.new_level()
         self.next_scene = "Menu"
         pygame.time.set_timer(fade_event, 1000)
