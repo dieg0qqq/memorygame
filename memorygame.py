@@ -53,8 +53,8 @@ game_images_dict = {}
 # we load the images here so they are accessible throughout. we use os.listdir which just returns a list of strings which are the filenames of
 # the files in that directory. Then we iterate throught them, load the image using pygame.image.load, and create the game_image object
 # from the loaded images and add them to a list, and set that as the value for the key. Index is the key for the dictionary.
-index  = 0
 
+index  = 0
 for filename in os.listdir():
     if filename.startswith("Imgs"):
         images = []
@@ -71,26 +71,22 @@ for filename in os.listdir():
 
         game_images_dict[index] = images
         index += 1
-        # cont = min(6, len(files))
 
 # the background image
 background_img = pygame.image.load('fondo_memory.png')
 
+# here we load the correct and incorrect images which are displayed to the user
+correct_img = pygame.image.load('emoji_correcto.png')
+
+incorrect_img = pygame.image.load('incorrecto.png')
+
 # the arrows image
 flechaImg = pygame.image.load('flecha.png')
-
-# here we load the correct and incorrect images which are displayed to the user
-correct_img = pygame.image.load('correct.png')
-correct_img = pygame.transform.scale(correct_img, (400,400))
-
-incorrect_img = pygame.image.load('incorrect.png')
-incorrect_img = pygame.transform.scale(incorrect_img, (400,400))
 
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
 
 # level names
-
 level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
 "Dibujos Animales", "Dibujos Transportes I", "Dibujos Transportes II", 
 "Dibujos Deportes", "Letras", "Palabras Mayúsculas","Palabras Minúsculas" ,
@@ -142,8 +138,7 @@ class Scene(pygame.Surface):
         self.rect = pygame.Rect(screenrect)
         self.next_scene = next_scene
 
-        # it has the background image and the flecha img
-        # so all scenes can use the same background and the flecha img
+        # it has the background image and the flecha img so all scenes can use the same background and the flecha img
         self.background_img = background_img 
         self.flechaImg_rect = flechaImg.get_rect()
         self.flechaImg_rect.move_ip(1000,500)  
@@ -154,8 +149,7 @@ class Scene(pygame.Surface):
             pygame.time.set_timer(fade_event, 1000)
             return self.next_scene
 
-    # there is an update here that does nothing update is called in the main loop and the IntroScene has no updating to do
-    # so it would crash otherwise when we tried to call update on the IntroScene (hope that makes sense!)
+    # there is an update here that does nothing update is called in the main loop and the IntroScene has no updating to do so it would crash otherwise when we tried to call update on the IntroScene (hope that makes sense!)
     def update(self, dt):
         pass
 
@@ -294,13 +288,11 @@ class GameScene(Scene):
             # Second half 
             text2 = font.render('¿Qué has visto?',True, PURPLE)
             screen.blit(text2, (400,5))
-            
 
             # Show all similar images       
-            cont = 0
             for game_image in self.game_images:
                 game_image.draw(screen)
-                cont += 1
+                
             # We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
             self.correct_image_rect = self.game_images[self.game_images.index(self.main_image)].rect
 
@@ -333,17 +325,21 @@ class AnswerScene(Scene):
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
             self.text = font.render('¡Correcto!', True, GREEN)
+            self.img_rect = correct_img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+            self.text_rect = self.text.get_rect(center=(SCREEN_WIDTH/2, 70))
         else:
             wrong = pygame.mixer.Sound('music/incorrect.wav')
             wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
             self.text = font.render('¡Incorrecto!', True, RED)
+            self.text_rect = self.text.get_rect(center=(SCREEN_WIDTH/2, 70))
+            self.img_rect = incorrect_img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
 
     def draw(self,surf):
         super().draw(surf)
-        surf.blit(self.text, (500, 40))
-        surf.blit(self.image, (490, 180))
+        surf.blit(self.text, self.text_rect)
+        surf.blit(self.image, self.img_rect)
         surf.blit(flechaImg, self.flechaImg_rect)
 
 # this shows the score and asks if the player wants to play again
