@@ -2,11 +2,6 @@
 import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
 
-# Set size of window
-size = 1280,768
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 768
-
 # Colours   R   G   B
 GRAY     = (100, 100, 100)
 NAVYBLUE = ( 60,  60, 100)
@@ -19,6 +14,11 @@ YELLOW   = (255, 255,   0)
 ORANGE   = (255, 128,   0)
 PURPLE   = (127,   0, 255)
 CYAN     = (  0, 255, 255)
+
+# Set size of window
+size = 1280,768
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 768
 
 # init pygame
 pygame.init()
@@ -77,7 +77,6 @@ background_img = pygame.image.load('fondo_memory.png')
 
 # here we load the correct and incorrect images which are displayed to the user
 correct_img = pygame.image.load('emoji_correcto.png')
-
 incorrect_img = pygame.image.load('incorrecto.png')
 
 # the arrows image
@@ -88,7 +87,7 @@ font = pygame.font.SysFont("comicsansms", 70)
 
 # level names
 level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
-"Dibujos Animales", "Dibujos Transportes I", "Dibujos Transportes II", 
+"Dibujos Animales", "Logos Transportes", "Dibujos Transportes", 
 "Dibujos Deportes", "Letras", "Palabras Mayúsculas","Palabras Minúsculas" ,
 "Pictogramas Emociones", "Fotos Emociones", "Personas en Acción"]
 
@@ -324,7 +323,7 @@ class AnswerScene(Scene):
             correct.set_volume(1)
             pygame.mixer.find_channel().play(correct)
             self.image = correct_img.copy()
-            self.text = font.render('¡Correcto!', True, GREEN)
+            self.text = font.render('¡Bien hecho!', True, GREEN)
             self.img_rect = correct_img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
             self.text_rect = self.text.get_rect(center=(SCREEN_WIDTH/2, 70))
         else:
@@ -332,7 +331,7 @@ class AnswerScene(Scene):
             wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
-            self.text = font.render('¡Incorrecto!', True, RED)
+            self.text = font.render('¡No pasa nada!', True, RED)
             self.text_rect = self.text.get_rect(center=(SCREEN_WIDTH/2, 70))
             self.img_rect = incorrect_img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
 
