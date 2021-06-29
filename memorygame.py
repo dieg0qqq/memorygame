@@ -112,7 +112,7 @@ class Button(pygame.Surface):
    
     def update(self):
         if self.selected:
-            self.blit(self.selected_surf, (0, 0)) #, special_flags=pygame.BLEND_MULT)
+            self.blit(self.selected_surf, (0, 0))
             self.blit(self.text_surf2, (0,0))
         else:
             self.blit(self.text_surf, (0,0))
@@ -198,11 +198,9 @@ class MenuScene(Scene):
                  else:
                       button.selected = True
                       button.update()
-            
             elif self.flechaImg_rect.collidepoint(event.pos):
                 pygame.time.set_timer(fade_event, 1000)
                 return "next_game"
-
             else:
                 button.selected = False
                 button.update()
@@ -236,25 +234,18 @@ class GameScene(Scene):
         self.record_text = font.render('Atiende',True, PURPLE)
         self.record_text_rect = self.record_text.get_rect(center=(SCREEN_WIDTH/2, 70))
         self.correct_image_rect = None
-
-        # Trying to use colliderect so it doesnt overlap
-        # this is the same code as before but adapted to use the gameimage class and the rects stored there
         self.rects = []
-        
-    # this is the fade stuff from before that was in draw. It really belongs here tbh
+    
     def update(self, dt):
-        
-        
         if len(self.rects) < len(self.game_images):
-            i = len(self.rects)
             
             x = random.randint(100,950)
             y = random.randint(100,600) 
-
+            i = len(self.rects)
             self.game_images[i].rect.x = x
             self.game_images[i].rect.y = y
 
-            margin = 5
+            margin = 10
             rl = [rect.inflate(margin*2, margin*2) for rect in self.rects]
             if len(self.rects) == 0 or self.game_images[i].rect.collidelist(rl) < 0:
                 self.rects.append(self.game_images[i].rect)
@@ -271,12 +262,10 @@ class GameScene(Scene):
                 if self.current_alpha <= 0:
                     self.fade = False
                     self.part = 2
-
         else:
-            # we reset the main image alpha otherwise it will be invisible on the next screen (yeah, this one caught me out lol!)
+            # we reset the main image alpha otherwise it will be invisible on the next screen
             self.main_image.set_alpha(255)
         
-    # draw is similar to before, but a bit more streamlined as the fade stuff is not in update
     def draw(self, screen):
         super().draw(screen)
         
@@ -292,10 +281,9 @@ class GameScene(Scene):
             for game_image in self.game_images:
                 game_image.draw(screen)
                 
-            # We associate the correct rect to the correct image, to pass it later to the CORRECT Screen
+            # We associate the correct rect to the correct image, to pass it later to the AnswerSceen
             self.correct_image_rect = self.game_images[self.game_images.index(self.main_image)].rect
 
-    # again we pass the event to the game object the same as with the other classes
     def get_event(self, event):
         if self.part == 2:
             if self.game.level == 13:
@@ -382,15 +370,16 @@ class ScoreScene(Scene):
 class MemoryGame(object):
     def __init__(self):
         # all the initalisation is done here
-        # Definimos las dimensiones de la ventana (1600 x 900px) y reloj
+        # define the size of the window
         self.screen = screen
         self.clock = pygame.time.Clock()
         
+        # initialize and play the music
         pygame.mixer.music.load('music/bckg_music.mp3')
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
 
-        # Ponemos el título e icono y fondo de la ventana
+        # put an icon and name to the window
         pygame.display.set_caption("Memory")
         icon = pygame.image.load('icon.png')
         pygame.display.set_icon(icon)
@@ -398,7 +387,7 @@ class MemoryGame(object):
         # again we use a dict to store the game_image lists and use the level as the key
         self.game_images_dict = {}
 
-        # Para los niveles y puntuación
+        # initialize essential variables to function
         self.level = 0
         self.max_level = 13
         self.turn_counter = 0
@@ -406,7 +395,7 @@ class MemoryGame(object):
         self.game_over = False
         self.score = 0
 
-        # Creamos un nuevo nivel
+        # call make new level
         self.new_level()
 
         # we set the self.scene to point to an instance of the IntroScene and self.next_scene is set to None
@@ -442,20 +431,18 @@ class MemoryGame(object):
                 for file in files:
                     img = pygame.image.load(os.path.join(filename, file))
                     img.set_colorkey(WHITE)
-                    
                     if cont < 6:
                         images.append(GameImage(img))
                     cont += 1
-
                 game_images_dict[index] = images
                 index += 1
 
         self.new_level()
-        self.next_scene = "Menu"
+        self.next_scene = "Menu" # go back to MenuScene(selectLevels)
         pygame.time.set_timer(fade_event, 1000)
         self.update(0)
     
-    # this is the main loop - the code just goes around this over and over
+    # this is the main loop, the code just goes around this over and over
     def run(self):  
         # we use "running" as the name of our boolean to keep the 
         # loop running, as we don't want the name to clash with the method 
@@ -474,7 +461,7 @@ class MemoryGame(object):
         self.next_scene = None
         events = pygame.event.get()
         for event in events:
-            if event.type == pygame.QUIT: # Si el evento es salir de la ventana, terminamos
+            if event.type == pygame.QUIT: 
                 self.running = False
 
             elif event.type == fade_event:
@@ -532,7 +519,8 @@ class MemoryGame(object):
             pygame.mixer.music.play(-1)
             self.new_game()
 
-    # draw just passes the screen to the current scene so it can draw itself on it
+    # draw just passes the screen to the current scene 
+    # so it can draw itself on it
     def draw(self): 
         self.scene.draw(self.screen)
         pygame.display.flip()
