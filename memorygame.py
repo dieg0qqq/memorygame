@@ -1,7 +1,13 @@
 # Import libraries
 import os, sys, pygame, pygame.freetype, pygame.mixer, random
 from pygame.locals import *
+from collections import defaultdict
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+  
 # Colours   R   G   B
 GRAY     = (100, 100, 100)
 NAVYBLUE = ( 60,  60, 100)
@@ -48,7 +54,7 @@ class GameImage(object):
 
 # we make a dictionary for the game_image objects and create them here when we load the images.  The level is the index into this in 
 # the game, so we can switch between them using that. Hence, 1 is the key for the level 1 game_image objects and so on
-game_images_dict = {}
+game_images_dict = defaultdict(list)
 
 # we load the images here so they are accessible throughout. we use os.listdir which just returns a list of strings which are the filenames of
 # the files in that directory. Then we iterate throught them, load the image using pygame.image.load, and create the game_image object
@@ -62,7 +68,8 @@ for filename in os.listdir():
         files = os.listdir(filename)
         random.shuffle(files)
         for file in files:
-            img = pygame.image.load(os.path.join(filename, file))
+            img = pygame.image.load(resource_path(os.path.join(filename, file)))
+            print(resource_path(os.path.join(filename, file)))
             img.set_colorkey(WHITE)
             
             if cont < 6:
@@ -73,14 +80,14 @@ for filename in os.listdir():
         index += 1
 
 # the background image
-background_img = pygame.image.load('fondo_memory.png')
+background_img = pygame.image.load(resource_path("fondo_memory.png"))
 
 # here we load the correct and incorrect images which are displayed to the user
-correct_img = pygame.image.load('emoji_correcto.png')
-incorrect_img = pygame.image.load('incorrecto.png')
+correct_img = pygame.image.load(resource_path('emoji_correcto.png'))
+incorrect_img = pygame.image.load(resource_path('incorrecto.png'))
 
 # the arrows image
-flechaImg = pygame.image.load('flecha.png')
+flechaImg = pygame.image.load(resource_path('flecha.png'))
 
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
@@ -350,7 +357,7 @@ class ScoreScene(Scene):
     def get_event(self, event):
         mouse_pos = event.pos
         if self.no_rect.collidepoint(mouse_pos):
-            pygame.quit()
+            #pygame.quit()
             sys.exit()
         elif self.yes_rect.collidepoint(mouse_pos):
             return self.next_scene
@@ -375,17 +382,17 @@ class MemoryGame(object):
         self.clock = pygame.time.Clock()
         
         # initialize and play the music
-        pygame.mixer.music.load('music/bckg_music.mp3')
+        pygame.mixer.music.load(resource_path('music/bckg_music.mp3'))
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.play(-1)
 
         # put an icon and name to the window
         pygame.display.set_caption("Memory")
-        icon = pygame.image.load('icon.png')
+        icon = pygame.image.load(resource_path('icon.png'))
         pygame.display.set_icon(icon)
 
         # again we use a dict to store the game_image lists and use the level as the key
-        self.game_images_dict = {}
+        self.game_images_dict = defaultdict(list)
 
         # initialize essential variables to function
         self.level = 0
@@ -402,7 +409,7 @@ class MemoryGame(object):
         self.Intro = IntroScene("Menu")
         self.scene = self.Intro
         self.next_scene = None
-
+    
     def new_level(self):
         self.turn_counter = 0
         self.game_images = game_images_dict[self.level]
@@ -429,7 +436,7 @@ class MemoryGame(object):
                 files = os.listdir(filename)
                 random.shuffle(files)
                 for file in files:
-                    img = pygame.image.load(os.path.join(filename, file))
+                    img = pygame.image.load(resource_path(os.path.join(filename, file)))
                     img.set_colorkey(WHITE)
                     if cont < 6:
                         images.append(GameImage(img))
@@ -471,7 +478,7 @@ class MemoryGame(object):
             # the only event we are interested in in the scenes is the mousebuttondown event, so that is the 
             # only event we send. This is why the scenes don't check for event.type == pygame.MOUSEBUTTONDOWN.
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                click = pygame.mixer.Sound('music/click.wav')
+                click = pygame.mixer.Sound(resource_path('music/click.wav'))
                 click.set_volume(0.3)
                 pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
@@ -510,11 +517,11 @@ class MemoryGame(object):
         
         elif self.next_scene == "score":
             self.scene = ScoreScene(self.score)
-            pygame.mixer.music.load('music/final3.wav')
+            pygame.mixer.music.load(resource_path('music/final3.wav'))
             pygame.mixer.music.set_volume(0.4)
             pygame.mixer.music.play()
         elif self.next_scene == "new_game":
-            pygame.mixer.music.load('music/bckg_music.mp3')
+            pygame.mixer.music.load(resource_path('music/bckg_music.mp3'))
             pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.play(-1)
             self.new_game()
@@ -528,5 +535,5 @@ class MemoryGame(object):
 if __name__ == '__main__':
     m = MemoryGame()
     m.run()
-    pygame.quit()
-    quit()
+    #pygame.quit()
+    sys.exit()
