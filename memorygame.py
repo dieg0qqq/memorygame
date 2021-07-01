@@ -22,9 +22,9 @@ PURPLE   = (127,   0, 255)
 CYAN     = (  0, 255, 255)
 
 # Set size of window
-size = 1280,768
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 768
+size = SCREEN_WIDTH,SCREEN_HEIGHT
 
 # init pygame
 pygame.init()
@@ -93,10 +93,10 @@ flechaImg = pygame.image.load(resource_path('flecha.png'))
 font = pygame.font.SysFont("comicsansms", 70)
 
 # level names
-level_names = ["Colores", "Formas Geométricas 2D", "Formas Geométricas 3D", 
-"Dibujos Animales", "Logos Transportes", "Dibujos Transportes", 
-"Dibujos Deportes", "Letras", "Palabras Mayúsculas","Palabras Minúsculas" ,
-"Pictogramas Emociones", "Fotos Emociones", "Personas en Acción"]
+level_names = ["Nivel 1: Colores", "Nivel 2.1: Formas Geométricas 2D", "Nivel 2.2: Formas Geométricas 3D", 
+"Nivel 3.1: Dibujos Animales", "Nivel 3.2: Logos Transportes", "Nivel 3.3: Dibujos Transportes", 
+"Nivel 3.4: Dibujos Deportes", "Nivel 4: Letras", "Nivel 5.1: Palabras Mayúsculas"," Nivel 5.2: Palabras Minúsculas",
+"Nivel 6: Pictogramas Emociones", "Nivel 7: Fotos Emociones", "Nivel 8: Personas en Acción"]
 
 # simple button class for the menu
 class Button(pygame.Surface):
@@ -265,7 +265,7 @@ class GameScene(Scene):
                 self.record_text.set_alpha(self.current_alpha)
 
                 # Speed whichin the image dissapears
-                self.current_alpha -= 5
+                self.current_alpha -= 3
                 if self.current_alpha <= 0:
                     self.fade = False
                     self.part = 2
@@ -384,7 +384,7 @@ class MemoryGame(object):
         # initialize and play the music
         pygame.mixer.music.load(resource_path('music/bckg_music.mp3'))
         pygame.mixer.music.set_volume(0.2)
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.play(-1)
 
         # put an icon and name to the window
         pygame.display.set_caption("Memory")
