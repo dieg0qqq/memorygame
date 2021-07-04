@@ -69,7 +69,6 @@ for filename in os.listdir():
         random.shuffle(files)
         for file in files:
             img = pygame.image.load(resource_path(os.path.join(filename, file)))
-            print(resource_path(os.path.join(filename, file)))
             img.set_colorkey(WHITE)
             
             if cont < 6:
@@ -342,9 +341,9 @@ class ScoreScene(Scene):
         super().__init__("new_game")
         self.score = str(score)
         self.score_surf = font.render(self.score, True, RED)
-        self.score_surf_rect = self.score_surf.get_rect(center=(SCREEN_WIDTH/2, 330))
+        self.score_surf_rect = self.score_surf.get_rect(center=(SCREEN_WIDTH/2, 200))
         self.play_again = font.render("¿Volver a jugar?", True, PURPLE)
-        self.play_again_rect = self.play_again.get_rect(center=(SCREEN_WIDTH/2, 70))
+        self.play_again_rect = self.play_again.get_rect(center=(SCREEN_WIDTH/2, 330))
 
         self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
         self.yes_rect = self.yes.get_rect()
@@ -366,7 +365,7 @@ class ScoreScene(Scene):
         super().draw(surf)
         font = pygame.font.SysFont("comicsansms",60)
         text = font.render('Puntuación', True, PURPLE)
-        text_rect = text.get_rect(center=(SCREEN_WIDTH/2, 200))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH/2, 70))
         surf.blit(text, text_rect)
         surf.blit(self.score_surf, self.score_surf_rect)
         surf.blit(self.play_again, self.play_again_rect)
@@ -384,7 +383,7 @@ class MemoryGame(object):
         # initialize and play the music
         pygame.mixer.music.load(resource_path('music/bckg_music.mp3'))
         pygame.mixer.music.set_volume(0.2)
-        #pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)
 
         # put an icon and name to the window
         pygame.display.set_caption("Memory")
