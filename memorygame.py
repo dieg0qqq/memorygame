@@ -87,6 +87,9 @@ incorrect_img = pygame.image.load(resource_path('incorrecto.png'))
 
 # the arrows image
 flechaImg = pygame.image.load(resource_path('flecha.png'))
+homeImg = pygame.image.load(resource_path('home.png'))
+soundImg = pygame.image.load(resource_path('sound.png'))
+nosoundImg = pygame.image.load(resource_path('nosound.png'))
 
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
@@ -139,20 +142,35 @@ class Button(pygame.Surface):
 # background and the flecha image
 
 class Scene(pygame.Surface):
-    def __init__(self, next_scene):
+    def __init__(self, next_scene, home_scene):
         self.rect = pygame.Rect(screenrect)
         self.next_scene = next_scene
+        self.home_scene = home_scene
 
         # it has the background image and the flecha img so all scenes can use the same background and the flecha img
         self.background_img = background_img 
         self.flechaImg_rect = flechaImg.get_rect()
         self.flechaImg_rect.move_ip(1000,500)  
+        self.homeImg_rect = homeImg.get_rect()
+        self.homeImg_rect.move_ip(1000,10)
+        self.soundImg_rect = soundImg.get_rect()
+        self.soundImg_rect.move_ip(1120, 10)
+        self.nosoundImg_rect = nosoundImg.get_rect()
+        self.nosoundImg_rect.move_ip(1120, 10)
+
+
 
     def get_event(self, event):
         mouse_pos = event.pos
         if self.flechaImg_rect.collidepoint(mouse_pos):
             pygame.time.set_timer(fade_event, 1000)
             return self.next_scene
+        elif self.homeImg_rect.collidepoint(mouse_pos):
+            pygame.time.set_timer(fade_event, 1000)
+            return self.home_scene
+        elif self.soundImg_rect.collidepoint(mouse_pos):
+            self.whatsound = "1"
+
 
     # there is an update here that does nothing update is called in the main loop and the IntroScene has no updating to do so it would crash otherwise when we tried to call update on the IntroScene (hope that makes sense!)
     def update(self, dt):
@@ -160,11 +178,13 @@ class Scene(pygame.Surface):
 
     def draw(self, surf):
         surf.blit(self.background_img, (0,0))
+        surf.blit(soundImg, self.soundImg_rect)
+        
         
 class IntroScene(Scene):
 
-    def __init__(self, next_scene):
-       super().__init__(next_scene)
+    def __init__(self, next_scene, home_scene):
+       super().__init__(next_scene, home_scene)
 
        self.flechaImg_rect = flechaImg.get_rect()
        self.flechaImg_rect.move_ip(1000,500)
@@ -179,7 +199,7 @@ class IntroScene(Scene):
 class MenuScene(Scene):
 
     def __init__(self, game):
-        super().__init__(None)
+        super().__init__(None, "Menu")
         self.game = game
         self.flechaImg_rect = flechaImg.get_rect()
         self.flechaImg_rect.move_ip(1000,500)
@@ -224,8 +244,8 @@ class MenuScene(Scene):
         surf.blit(flechaImg, self.flechaImg_rect)
             
 class GameScene(Scene):
-    def __init__(self, game, images, main_image, next_scene):
-        super().__init__(next_scene)
+    def __init__(self, game, images, main_image, next_scene, home_scene):
+        super().__init__(next_scene, home_scene)
         
         self.game = game
         self.main_image = main_image
@@ -304,13 +324,15 @@ class AnswerScene(Scene):
     def __init__(self, game, which_answer):
         self.game = game
         if not game.game_over:
-            super().__init__("next_game")
+            super().__init__("next_game", "Menu")
         else:
-            super().__init__("score")
+            super().__init__("score", "Menu")
 
         self.which_asnwer = which_answer
         self.flechaImg_rect = flechaImg.get_rect()
         self.flechaImg_rect.move_ip(1000,500)
+        self.homeImg_rect = homeImg.get_rect()
+        self.homeImg_rect.move_ip(1000,10)
 
         if self.which_asnwer == "correct":
             correct = pygame.mixer.Sound('music/correct.wav')
@@ -334,11 +356,12 @@ class AnswerScene(Scene):
         surf.blit(self.text, self.text_rect)
         surf.blit(self.image, self.img_rect)
         surf.blit(flechaImg, self.flechaImg_rect)
+        surf.blit(homeImg, self.homeImg_rect)
 
 # this shows the score and asks if the player wants to play again
 class ScoreScene(Scene):
     def __init__(self, score):
-        super().__init__("new_game")
+        super().__init__("new_game", "Menu")
         self.score = str(score)
         self.score_surf = font.render(self.score, True, RED)
         self.score_surf_rect = self.score_surf.get_rect(center=(SCREEN_WIDTH/2, 200))
@@ -356,7 +379,6 @@ class ScoreScene(Scene):
     def get_event(self, event):
         mouse_pos = event.pos
         if self.no_rect.collidepoint(mouse_pos):
-            #pygame.quit()
             sys.exit()
         elif self.yes_rect.collidepoint(mouse_pos):
             return self.next_scene
@@ -405,9 +427,10 @@ class MemoryGame(object):
         self.new_level()
 
         # we set the self.scene to point to an instance of the IntroScene and self.next_scene is set to None
-        self.Intro = IntroScene("Menu")
+        self.Intro = IntroScene("Menu", "Menu")
         self.scene = self.Intro
         self.next_scene = None
+        self.home_scene = "Menu"
     
     def new_level(self):
         self.turn_counter = 0
@@ -499,6 +522,10 @@ class MemoryGame(object):
         elif self.next_scene == "INCORRECT":
             self.scene = AnswerScene(self, "incorrect")
         elif self.next_scene == "Menu":
+            self.score = 0
+            self.level = 0
+            self.turn_counter = 0
+            self.game_over = False
             self.scene = MenuScene(self)
         elif self.next_scene == "next_game":
             main_image = self.previous_image
@@ -508,8 +535,8 @@ class MemoryGame(object):
                 main_image = random.choice(self.game_images)
 
             self.previous_image = main_image
-            self.scene = GameScene(self,self.game_images,main_image, "Score")
-            if self.turn_counter == 2:
+            self.scene = GameScene(self,self.game_images,main_image, "Score", "Menu")
+            if self.turn_counter == 3:
                 self.level += 1
                 if self.level < self.max_level:
                     self.new_level()
@@ -524,6 +551,7 @@ class MemoryGame(object):
             pygame.mixer.music.set_volume(0.2)
             pygame.mixer.music.play(-1)
             self.new_game()
+        
 
     # draw just passes the screen to the current scene 
     # so it can draw itself on it
