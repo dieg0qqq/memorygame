@@ -178,7 +178,6 @@ class Scene(pygame.Surface):
 
     def draw(self, surf):
         surf.blit(self.background_img, (0,0))
-        surf.blit(soundImg, self.soundImg_rect)
         
         
 class IntroScene(Scene):
