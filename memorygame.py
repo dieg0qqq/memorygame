@@ -90,8 +90,6 @@ flechaImg = pygame.image.load(resource_path('flecha.png'))
 flechaImgSize = (1280,600)
 homeImg = pygame.image.load(resource_path('home.png'))
 homeImgSize = (1450,20)
-soundImg = pygame.image.load(resource_path('sound.png'))
-nosoundImg = pygame.image.load(resource_path('nosound.png'))
 
 # set a font for use throughout
 font = pygame.font.SysFont("comicsansms", 70)
