@@ -22,8 +22,8 @@ PURPLE   = (127,   0, 255)
 CYAN     = (  0, 255, 255)
 
 # Set size of window
-SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 768
+SCREEN_WIDTH = 1600
+SCREEN_HEIGHT = 900
 size = SCREEN_WIDTH,SCREEN_HEIGHT
 
 # init pygame
@@ -87,7 +87,9 @@ incorrect_img = pygame.image.load(resource_path('incorrecto.png'))
 
 # the arrows image
 flechaImg = pygame.image.load(resource_path('flecha.png'))
+flechaImgSize = (1280,600)
 homeImg = pygame.image.load(resource_path('home.png'))
+homeImgSize = (1450,20)
 soundImg = pygame.image.load(resource_path('sound.png'))
 nosoundImg = pygame.image.load(resource_path('nosound.png'))
 
@@ -150,15 +152,9 @@ class Scene(pygame.Surface):
         # it has the background image and the flecha img so all scenes can use the same background and the flecha img
         self.background_img = background_img 
         self.flechaImg_rect = flechaImg.get_rect()
-        self.flechaImg_rect.move_ip(1000,500)  
+        self.flechaImg_rect.move_ip(flechaImgSize)  
         self.homeImg_rect = homeImg.get_rect()
-        self.homeImg_rect.move_ip(1000,10)
-        self.soundImg_rect = soundImg.get_rect()
-        self.soundImg_rect.move_ip(1120, 10)
-        self.nosoundImg_rect = nosoundImg.get_rect()
-        self.nosoundImg_rect.move_ip(1120, 10)
-
-
+        self.homeImg_rect.move_ip(homeImgSize)
 
     def get_event(self, event):
         mouse_pos = event.pos
@@ -168,9 +164,6 @@ class Scene(pygame.Surface):
         elif self.homeImg_rect.collidepoint(mouse_pos):
             pygame.time.set_timer(fade_event, 1000)
             return self.home_scene
-        elif self.soundImg_rect.collidepoint(mouse_pos):
-            self.whatsound = "1"
-
 
     # there is an update here that does nothing update is called in the main loop and the IntroScene has no updating to do so it would crash otherwise when we tried to call update on the IntroScene (hope that makes sense!)
     def update(self, dt):
@@ -186,7 +179,7 @@ class IntroScene(Scene):
        super().__init__(next_scene, home_scene)
 
        self.flechaImg_rect = flechaImg.get_rect()
-       self.flechaImg_rect.move_ip(1000,500)
+       self.flechaImg_rect.move_ip(flechaImgSize)
 
     def draw(self, surf):
         super().draw(surf)
@@ -201,7 +194,7 @@ class MenuScene(Scene):
         super().__init__(None, "Menu")
         self.game = game
         self.flechaImg_rect = flechaImg.get_rect()
-        self.flechaImg_rect.move_ip(1000,500)
+        self.flechaImg_rect.move_ip(flechaImgSize)
 
         y = 100
         self.level_buttons = []
@@ -211,7 +204,7 @@ class MenuScene(Scene):
             b = Button(level_text)
             b.rect.centerx = screenrect.centerx
             b.rect.y = y
-            y += 50
+            y += 60
             self.level_buttons.append(b)
 
     def get_event(self, event):
@@ -258,14 +251,16 @@ class GameScene(Scene):
 
         self.record_text = font.render('Atiende',True, PURPLE)
         self.record_text_rect = self.record_text.get_rect(center=(SCREEN_WIDTH/2, 70))
+        self.text2 = font.render('¿Qué has visto?',True, PURPLE)
+        self.text2_rect = self.text2.get_rect(center=(SCREEN_WIDTH/2, 70))
         self.correct_image_rect = None
         self.rects = []
     
     def update(self, dt):
         if len(self.rects) < len(self.game_images):
             
-            x = random.randint(100,950)
-            y = random.randint(100,600) 
+            x = random.randint(100,1350)
+            y = random.randint(100,700) 
             i = len(self.rects)
             self.game_images[i].rect.x = x
             self.game_images[i].rect.y = y
@@ -296,11 +291,10 @@ class GameScene(Scene):
         
         if self.part == 1:
             screen.blit(self.record_text, self.record_text_rect)
-            screen.blit(self.main_image.image, (540,270)) 
+            screen.blit(self.main_image.image, (SCREEN_WIDTH/2.2,SCREEN_HEIGHT/2.7)) 
         else:
             # Second half 
-            text2 = font.render('¿Qué has visto?',True, PURPLE)
-            screen.blit(text2, (400,5))
+            screen.blit(self.text2, self.text2_rect)
 
             # Show all similar images       
             for game_image in self.game_images:
@@ -329,9 +323,9 @@ class AnswerScene(Scene):
 
         self.which_asnwer = which_answer
         self.flechaImg_rect = flechaImg.get_rect()
-        self.flechaImg_rect.move_ip(1000,500)
+        self.flechaImg_rect.move_ip(flechaImgSize)
         self.homeImg_rect = homeImg.get_rect()
-        self.homeImg_rect.move_ip(1000,10)
+        self.homeImg_rect.move_ip(homeImgSize)
 
         if self.which_asnwer == "correct":
             correct = pygame.mixer.Sound('music/correct.wav')
@@ -369,11 +363,11 @@ class ScoreScene(Scene):
 
         self.yes = font.render("¡Sí!", True, GREEN, NAVYBLUE)
         self.yes_rect = self.yes.get_rect()
-        self.yes_rect.move_ip(500, 450)
+        self.yes_rect.move_ip(700, 450)
 
         self.no = font.render("No", True, RED, NAVYBLUE)
         self.no_rect = self.no.get_rect()
-        self.no_rect.move_ip(650, 450)
+        self.no_rect.move_ip(850, 450)
     
     def get_event(self, event):
         mouse_pos = event.pos
