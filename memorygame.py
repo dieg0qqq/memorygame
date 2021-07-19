@@ -342,7 +342,7 @@ class AnswerScene(Scene):
             self.img_rect = correct_img.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
             self.text_rect = self.text.get_rect(center=(SCREEN_WIDTH/2, 70))
         else:
-            wrong = pygame.mixer.Sound('music/incorrect.wav')
+            wrong = pygame.mixer.Sound('music/incorrect2.mp3')
             wrong.set_volume(1)
             pygame.mixer.find_channel().play(wrong)
             self.image = incorrect_img.copy()
@@ -501,6 +501,7 @@ class MemoryGame(object):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 click = pygame.mixer.Sound(resource_path('music/click.wav'))
                 click.set_volume(0.3)
+                
                 pygame.mixer.find_channel().play(click)
                 self.next_scene = self.scene.get_event(event)
 
